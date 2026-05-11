@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+from app.explainer import generate_explanation
 from app.product_enricher import enrich_products
 from app.product_search import search_products
 from app.requirements_parser import parse_requirements
@@ -15,9 +16,7 @@ class SearchRequest(BaseModel):
 
 @app.get("/")
 def root() -> dict:
-    return {
-        "message": "AI Deal Agent API is running"
-    }
+    return {"message": "AI Deal Agent API is running"}
 
 
 @app.post("/api/search")
@@ -31,6 +30,7 @@ def search(request: SearchRequest) -> dict:
         {
             "product": product,
             "score": calculate_score(product, requirements),
+            "explanations": generate_explanation(product, requirements),
         }
         for product in enriched_products
     ]

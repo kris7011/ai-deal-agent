@@ -96,6 +96,16 @@ h1 {
   text-decoration: underline;
 }
 
+.product-explanations {
+  margin-top: 1rem;
+  font-size: 14px;
+  color: #d1d5db;
+}
+
+.product-explanations p {
+  margin: 4px 0;
+}
+
 .error-message {
   color: #f87171;
   font-weight: bold;

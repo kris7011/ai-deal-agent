@@ -12,6 +12,7 @@ type Product = {
 type ProductResult = {
   product: Product;
   score: number;
+  explanations: string[];
 };
 
 function App() {
@@ -21,17 +22,15 @@ function App() {
   const [error, setError] = useState<string | null>(null);
 
   async function searchProducts() {
+    if (!query.trim()) {
+      setError("Skriv hvad du leder efter først.");
+      return;
+    }
+
+    setError(null);
     setLoading(true);
 
     try {
-      if (!query.trim()) {
-        setError("Skriv hvad du leder efter først.");
-        return;
-      }
-
-      setError(null);
-      setLoading(true);
-
       const response = await fetch("http://127.0.0.1:8000/api/search", {
         method: "POST",
         headers: {
@@ -49,9 +48,9 @@ function App() {
     } catch (error) {
       console.error(error);
       setError("Der skete en fejl. Prøv venligst igen");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   return (
@@ -90,6 +89,14 @@ function App() {
             <p className="product-score">
               Score: {item.score}/100
             </p>
+
+            <div className="product-explanations">
+              {item.explanations.map((explanation) => (
+                <p key={explanation}>
+                  {explanation}
+                </p>
+              ))}
+            </div>
 
             <a
               className="product-link"
