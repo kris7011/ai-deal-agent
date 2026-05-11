@@ -3,6 +3,7 @@ import requests
 from dotenv import load_dotenv
 
 from app.models import Product
+from app.cache_service import load_cache, save_cache
 
 
 def search_products(query: str) -> list[Product]:
@@ -13,21 +14,27 @@ def search_products(query: str) -> list[Product]:
     if not api_key:
         raise ValueError("SERPAPI_API_KEY is missing from .env")
 
-    response = requests.get(
-        "https://serpapi.com/search.json",
-        params={
-            "engine": "google_shopping",
-            "q": query,
-            "api_key": api_key,
-            "gl": "dk",
-            "hl": "da",
-        },
-        timeout=20,
-    )
+    cached_data = load_cache(query)
 
-    response.raise_for_status()
+    if cached_data is not None:
+        data = cached_data
+    else:
+        response = requests.get(
+            "https://serpapi.com/search.json",
+            params={
+                "engine": "google_shopping",
+                "q": query,
+                "api_key": api_key,
+                "gl": "dk",
+                "hl": "da",
+            },
+            timeout=20,
+        )
 
-    data = response.json()
+        response.raise_for_status()
+        data = response.json()
+        save_cache(query, data)
+
     shopping_results = data.get("shopping_results", [])
 
     products = []
@@ -36,7 +43,8 @@ def search_products(query: str) -> list[Product]:
         product = Product(
             name=item.get("title", "Unknown product"),
             price=_parse_price(item.get("price")),
-            url=item.get("link", ""),
+            url=_get_product_url(item),
+            image_url=item.get("thumbnail"),
             suction_pa=None,
             has_mop=None,
             has_obstacle_avoidance=None,
@@ -67,3 +75,11 @@ def _parse_price(price_text: str | None) -> int:
         return int(float(cleaned))
     except ValueError:
         return 0
+    
+def _get_product_url(item: dict) -> str:
+    return (
+        item.get("link")
+        or item.get("product_link")
+        or item.get("serpapi_product_api")
+        or ""
+    )

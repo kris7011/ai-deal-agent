@@ -40,6 +40,7 @@ def enrich_product(product: Product) -> Product:
         name=product.name,
         price=product.price,
         url=product.url,
+        image_url=product.image_url,
         suction_pa=suction_pa,
         has_mop=has_mop,
         has_obstacle_avoidance=has_obstacle_avoidance,
