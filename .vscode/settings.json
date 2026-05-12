@@ -16,6 +16,7 @@
         "forstod",
         "gemt",
         "hentet",
+        "herre",
         "hvad",
         "hvis",
         "igen",
@@ -31,8 +32,10 @@
         "moppefunktion",
         "Muligt",
         "produktet",
+        "programmering",
         "Prøv",
         "pycache",
+        "pythonpath",
         "Resultater",
         "SERPAPI",
         "skete",
@@ -45,6 +48,7 @@
         "Stærkt",
         "tæppe",
         "tæpper",
+        "testpaths",
         "Tillad",
         "tillade",
         "Tjek",
@@ -53,7 +57,9 @@
         "udført",
         "undgåelse",
         "uvicorn",
+        "vandtæt",
         "venligst",
-        "venv"
+        "venv",
+        "vinterjakke"
     ]
 }
