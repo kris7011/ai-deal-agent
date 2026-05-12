@@ -51,3 +51,42 @@ def test_parse_empty_feature_list_when_no_requirements_found():
     assert requirements.product_type == "gaming mus"
     assert requirements.max_price is None
     assert requirements.required_features == []
+
+
+def test_parse_wireless_gaming_mouse_with_budget():
+    # Arrange
+    query = "trådløs gaming mus under 1000 kr"
+
+    # Act
+    requirements = parse_requirements(query)
+
+    # Assert
+    assert requirements.product_type == "gaming mus"
+    assert requirements.max_price == 1000
+    assert requirements.required_features == ["trådløs"]
+
+
+def test_parse_quiet_coffee_machine_with_timer_and_budget():
+    # Arrange
+    query = "støjsvag kaffemaskine med timer under 1500 kr"
+
+    # Act
+    requirements = parse_requirements(query)
+
+    # Assert
+    assert requirements.product_type == "kaffemaskine"
+    assert requirements.max_price == 1500
+    assert requirements.required_features == ["støjsvag", "timer"]
+
+
+def test_parse_powerful_powerbank_with_usb_c():
+    # Arrange
+    query = "kraftig powerbank med usb-c"
+
+    # Act
+    requirements = parse_requirements(query)
+
+    # Assert
+    assert requirements.product_type == "powerbank"
+    assert requirements.max_price is None
+    assert requirements.required_features == ["kraftig", "usb-c"]
