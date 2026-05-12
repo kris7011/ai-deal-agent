@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from app.badge_generator import generate_badges
 from app.explainer import generate_explanation
 from app.product_search import search_products
 from app.requirements_parser import parse_requirements
@@ -48,14 +49,19 @@ def search(request: SearchRequest) -> dict:
             detail=str(error),
         )
 
-    scored_products = [
-        {
-            "product": product,
-            "score": calculate_score(product, requirements),
-            "explanations": generate_explanation(product, requirements),
-        }
-        for product in products
-    ]
+    scored_products = []
+
+    for product in products:
+        score = calculate_score(product, requirements)
+
+        scored_products.append(
+            {
+                "product": product,
+                "score": score,
+                "badges": generate_badges(product, requirements, score),
+                "explanations": generate_explanation(product, requirements),
+            }
+        )
 
     scored_products.sort(
         key=lambda item: item["score"],

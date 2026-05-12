@@ -12,6 +12,7 @@ type Product = {
 type ProductResult = {
   product: Product;
   score: number;
+  badges: string[];
   explanations: string[];
 };
 
@@ -115,6 +116,14 @@ function App() {
             )}
 
             <h3>{item.product.name}</h3>
+
+            <div className="product-badges">
+              {item.badges.map((badge) => (
+                <span key={badge} className="product-badge">
+                  {badge}
+                </span>
+              ))}
+            </div>
 
             <p className="product-price">{item.product.price} kr.</p>
 

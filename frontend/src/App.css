@@ -105,6 +105,22 @@ h1 {
   min-height: 70px;
 }
 
+.product-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0.75rem 0;
+}
+
+.product-badge {
+  background-color: #312e81;
+  color: #c7d2fe;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
 .product-price {
   font-size: 24px;
   font-weight: bold;
