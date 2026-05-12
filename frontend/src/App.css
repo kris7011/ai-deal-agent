@@ -152,3 +152,16 @@ h1 {
 .product-explanations p {
   margin: 4px 0;
 }
+
+.requirements-summary {
+  margin-top: 1rem;
+  background-color: #1f2937;
+  border-radius: 12px;
+  padding: 1rem;
+  color: #e5e7eb;
+  font-size: 14px;
+}
+
+.requirements-summary p {
+  margin: 4px 0;
+}

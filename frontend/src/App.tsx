@@ -16,6 +16,12 @@ type ProductResult = {
   explanations: string[];
 };
 
+type SearchRequirements = {
+  product_type: string;
+  max_price: number | null;
+  required_features: string[];
+};
+
 function App() {
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState<ProductResult[]>([]);
@@ -23,6 +29,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [allowLiveSearch, setAllowLiveSearch] = useState(false);
   const [usedCache, setUsedCache] = useState<boolean | null>(null);
+  const [requirements, setRequirements] = useState<SearchRequirements | null>(null);
 
   async function searchProducts() {
     if (!query.trim()) {
@@ -34,6 +41,7 @@ function App() {
     setLoading(true);
     setProducts([]);
     setUsedCache(null);
+    setRequirements(null);
 
     try {
       const response = await fetch("http://127.0.0.1:8000/api/search", {
@@ -55,6 +63,7 @@ function App() {
 
       setProducts(data.products);
       setUsedCache(data.used_cache);
+      setRequirements(data.requirements);
     } catch (error) {
       console.error(error);
 
@@ -105,6 +114,27 @@ function App() {
           </p>
         )}
       </div>
+
+      {requirements && (
+        <div className="requirements-summary">
+          <p>
+            <strong>Agenten forstod søgningen som:</strong>
+          </p>
+          <p>Produkt: {requirements.product_type}</p>
+          <p>
+            Makspris:{" "}
+            {requirements.max_price
+              ? `${requirements.max_price} kr.`
+              : "Ikke angivet"}
+          </p>
+          <p>
+            Krav:{" "}
+            {requirements.required_features.length > 0
+              ? requirements.required_features.join(", ")
+              : "Ingen specifikke krav fundet"}
+          </p>
+        </div>
+      )}
 
       {loading && <p>Loader...</p>}
 

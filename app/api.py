@@ -72,5 +72,10 @@ def search(request: SearchRequest) -> dict:
         "query": request.query,
         "count": len(scored_products),
         "used_cache": search_result.used_cache,
+        "requirements": {
+            "product_type": requirements.product_type,
+            "max_price": requirements.max_price,
+            "required_features": requirements.required_features,
+        },
         "products": scored_products[:10],
     }
