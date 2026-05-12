@@ -23,6 +23,7 @@ app.add_middleware(
 
 class SearchRequest(BaseModel):
     query: str
+    allow_live_search: bool = False
 
 
 @app.get("/")
@@ -35,7 +36,12 @@ def search(request: SearchRequest) -> dict:
     requirements = parse_requirements(request.query)
 
     try:
-        products = search_products(request.query)
+        search_result = search_products(
+            request.query,
+            allow_live_search=request.allow_live_search,
+        )
+
+        products = search_result.products
     except ValueError as error:
         raise HTTPException(
             status_code=400,
@@ -59,5 +65,6 @@ def search(request: SearchRequest) -> dict:
     return {
         "query": request.query,
         "count": len(scored_products),
+        "used_cache": search_result.used_cache,
         "products": scored_products[:10],
     }

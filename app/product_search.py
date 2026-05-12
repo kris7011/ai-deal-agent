@@ -1,30 +1,43 @@
 import os
 import requests
 from dotenv import load_dotenv
-
+from dataclasses import dataclass
 from app.models import Product
 from app.cache_service import load_cache, save_cache
 
 
-def search_products(query: str) -> list[Product]:
-    load_dotenv()
+@dataclass
+class ProductSearchResult:
+    products: list[Product]
+    used_cache: bool
 
-    api_key = os.getenv("SERPAPI_API_KEY")
-    allow_live_search = os.getenv("ALLOW_LIVE_SEARCH", "false").lower() == "true"
 
-    if not api_key:
-        raise ValueError("SERPAPI_API_KEY is missing from .env")
+def search_products(query: str, allow_live_search: bool = False) -> ProductSearchResult:
+    load_dotenv(override=True)
+
+    live_search_enabled = os.getenv("ALLOW_LIVE_SEARCH", "false").lower() == "true"
 
     cached_data = load_cache(query)
+    used_cache = False
 
     if cached_data is not None:
         data = cached_data
+        used_cache = True
     else:
         if not allow_live_search:
             raise ValueError(
-                "No cached result found and live search is disabled. "
-                "Set ALLOW_LIVE_SEARCH=true in .env to allow a new SerpAPI call."
+                "Ingen cache fundet for denne søgning. Live-søgning er ikke valgt."
             )
+
+        if not live_search_enabled:
+            raise ValueError(
+                "Live-søgning er slået fra i .env. Sæt ALLOW_LIVE_SEARCH=true for at tillade nye SerpAPI-kald."
+            )
+
+        api_key = os.getenv("SERPAPI_API_KEY")
+
+        if not api_key:
+            raise ValueError("SERPAPI_API_KEY is missing from .env")
 
         response = requests.get(
             "https://serpapi.com/search.json",
@@ -62,7 +75,10 @@ def search_products(query: str) -> list[Product]:
 
         products.append(product)
 
-    return products
+    return ProductSearchResult(
+        products=products,
+        used_cache=used_cache,
+    )
 
 
 def _parse_price(price_text: str | None) -> int:

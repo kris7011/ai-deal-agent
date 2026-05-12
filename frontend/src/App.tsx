@@ -20,6 +20,8 @@ function App() {
   const [products, setProducts] = useState<ProductResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [allowLiveSearch, setAllowLiveSearch] = useState(false);
+  const [usedCache, setUsedCache] = useState<boolean | null>(null);
 
   async function searchProducts() {
     if (!query.trim()) {
@@ -30,6 +32,7 @@ function App() {
     setError(null);
     setLoading(true);
     setProducts([]);
+    setUsedCache(null);
 
     try {
       const response = await fetch("http://127.0.0.1:8000/api/search", {
@@ -37,7 +40,10 @@ function App() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({
+          query,
+          allow_live_search: allowLiveSearch,
+        }),
       });
 
       const data = await response.json();
@@ -47,6 +53,7 @@ function App() {
       }
 
       setProducts(data.products);
+      setUsedCache(data.used_cache);
     } catch (error) {
       console.error(error);
 
@@ -64,18 +71,38 @@ function App() {
     <div className="page">
       <h1>AI Deal Agent</h1>
 
-      <div className="search-bar">
-        <input
-          type="text"
-          placeholder="Søg efter produkter..."
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-        />
+      <div className="search-section">
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Søg efter produkter..."
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+
+          <button onClick={searchProducts} disabled={loading}>
+            {loading ? "Søger..." : "Søg"}
+          </button>
+        </div>
+
+        <label className="live-search-toggle">
+          <input
+            type="checkbox"
+            checked={allowLiveSearch}
+            onChange={(event) => setAllowLiveSearch(event.target.checked)}
+          />
+          Tillad live-søgning hvis cache mangler
+        </label>
+
         {error && <p className="error-message">{error}</p>}
 
-        <button onClick={searchProducts} disabled={loading}>
-          {loading ? "Søger..." : "Søg"}
-        </button>
+        {usedCache !== null && (
+          <p className="search-source">
+            {usedCache
+              ? "Resultater hentet fra cache. Ingen SerpAPI-søgning brugt."
+              : "Ny live-søgning udført og gemt i cache."}
+          </p>
+        )}
       </div>
 
       {loading && <p>Loader...</p>}
@@ -89,19 +116,15 @@ function App() {
 
             <h3>{item.product.name}</h3>
 
-            <p className="product-price">
-              {item.product.price} kr.
-            </p>
+            <p className="product-price">{item.product.price} kr.</p>
+
             <p>Butik: {item.product.source}</p>
-            <p className="product-score">
-              Score: {item.score}/100
-            </p>
+
+            <p className="product-score">Score: {item.score}/100</p>
 
             <div className="product-explanations">
               {item.explanations.map((explanation) => (
-                <p key={explanation}>
-                  {explanation}
-                </p>
+                <p key={explanation}>{explanation}</p>
               ))}
             </div>
 

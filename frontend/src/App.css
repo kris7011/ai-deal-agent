@@ -15,10 +15,14 @@ h1 {
   margin-bottom: 2rem;
 }
 
+.search-section {
+  margin-bottom: 2rem;
+}
+
 .search-bar {
   display: flex;
   gap: 10px;
-  margin-bottom: 2rem;
+  margin-bottom: 0.75rem;
 }
 
 .search-bar input {
@@ -41,6 +45,33 @@ h1 {
 
 .search-bar button:hover {
   background-color: #6366f1;
+}
+
+.search-bar button:disabled {
+  background-color: #6b7280;
+  cursor: not-allowed;
+}
+
+.live-search-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #d1d5db;
+  font-size: 14px;
+}
+
+.search-source {
+  color: #a7f3d0;
+  font-size: 14px;
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+}
+
+.error-message {
+  color: #f87171;
+  font-weight: bold;
+  margin-top: 0.75rem;
+  margin-bottom: 0;
 }
 
 .product-grid {
@@ -104,9 +135,4 @@ h1 {
 
 .product-explanations p {
   margin: 4px 0;
-}
-
-.error-message {
-  color: #f87171;
-  font-weight: bold;
 }
