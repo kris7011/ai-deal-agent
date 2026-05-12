@@ -10,6 +10,7 @@ def search_products(query: str) -> list[Product]:
     load_dotenv()
 
     api_key = os.getenv("SERPAPI_API_KEY")
+    allow_live_search = os.getenv("ALLOW_LIVE_SEARCH", "false").lower() == "true"
 
     if not api_key:
         raise ValueError("SERPAPI_API_KEY is missing from .env")
@@ -19,6 +20,12 @@ def search_products(query: str) -> list[Product]:
     if cached_data is not None:
         data = cached_data
     else:
+        if not allow_live_search:
+            raise ValueError(
+                "No cached result found and live search is disabled. "
+                "Set ALLOW_LIVE_SEARCH=true in .env to allow a new SerpAPI call."
+            )
+
         response = requests.get(
             "https://serpapi.com/search.json",
             params={
@@ -63,8 +70,7 @@ def _parse_price(price_text: str | None) -> int:
         return 0
 
     cleaned = (
-        price_text
-        .replace("kr.", "")
+        price_text.replace("kr.", "")
         .replace("kr", "")
         .replace(".", "")
         .replace(",", ".")
@@ -75,7 +81,8 @@ def _parse_price(price_text: str | None) -> int:
         return int(float(cleaned))
     except ValueError:
         return 0
-    
+
+
 def _get_product_url(item: dict) -> str:
     return (
         item.get("link")

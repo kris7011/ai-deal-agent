@@ -1,19 +1,53 @@
-from app.requirements import ProductRequirements
+import re
+
+from app.requirements import SearchRequirements
 
 
-def parse_requirements(user_query: str) -> ProductRequirements:
-    query = user_query.lower()
+def parse_requirements(user_query: str) -> SearchRequirements:
+    query = user_query.strip()
+    lower_query = query.lower()
 
-    max_price = 5000
-
-    if "10000" in query:
-        max_price = 10000
-
-    return ProductRequirements(
-        product_type="robot vacuum",
-        max_price=max_price,
-        must_have_mop=True,
-        must_have_obstacle_avoidance=True,
-        min_suction_pa=5000,
-        must_handle_rugs=True,
+    return SearchRequirements(
+        product_type=_parse_product_type(lower_query),
+        max_price=_parse_max_price(lower_query),
+        required_features=_parse_required_features(lower_query),
+        raw_query=query,
     )
+
+
+def _parse_product_type(query: str) -> str:
+    separators = [" med ", " under ", " maks ", " max ", " op til "]
+
+    product_type = query
+
+    for separator in separators:
+        if separator in product_type:
+            product_type = product_type.split(separator)[0]
+
+    return product_type.strip()
+
+
+def _parse_max_price(query: str) -> int | None:
+    match = re.search(r"(?:max|maks|under|op til)\s*(\d{3,6})", query)
+
+    if not match:
+        return None
+
+    return int(match.group(1))
+
+
+def _parse_required_features(query: str) -> list[str]:
+    if " med " not in query:
+        return []
+
+    feature_text = query.split(" med ", 1)[1]
+
+    price_words = [" max ", " maks ", " under ", " op til "]
+
+    for price_word in price_words:
+        if price_word in feature_text:
+            feature_text = feature_text.split(price_word, 1)[0]
+
+    parts = re.split(r",| og ", feature_text)
+
+    return [part.strip() for part in parts if part.strip()]

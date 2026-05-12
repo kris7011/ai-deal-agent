@@ -29,6 +29,7 @@ function App() {
 
     setError(null);
     setLoading(true);
+    setProducts([]);
 
     try {
       const response = await fetch("http://127.0.0.1:8000/api/search", {
@@ -39,15 +40,21 @@ function App() {
         body: JSON.stringify({ query }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Søgningen fejlede.");
+        throw new Error(data.detail ?? "Søgningen fejlede.");
       }
 
-      const data = await response.json();
       setProducts(data.products);
     } catch (error) {
       console.error(error);
-      setError("Der skete en fejl. Prøv venligst igen");
+
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Der skete en fejl. Prøv venligst igen.");
+      }
     } finally {
       setLoading(false);
     }

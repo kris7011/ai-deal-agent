@@ -1,13 +1,24 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from app.explainer import generate_explanation
-from app.product_enricher import enrich_products
 from app.product_search import search_products
 from app.requirements_parser import parse_requirements
 from app.scorer import calculate_score
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class SearchRequest(BaseModel):
@@ -23,8 +34,13 @@ def root() -> dict:
 def search(request: SearchRequest) -> dict:
     requirements = parse_requirements(request.query)
 
-    products = search_products(request.query)
-    enriched_products = enrich_products(products)
+    try:
+        products = search_products(request.query)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
+        )
 
     scored_products = [
         {
@@ -32,7 +48,7 @@ def search(request: SearchRequest) -> dict:
             "score": calculate_score(product, requirements),
             "explanations": generate_explanation(product, requirements),
         }
-        for product in enriched_products
+        for product in products
     ]
 
     scored_products.sort(
