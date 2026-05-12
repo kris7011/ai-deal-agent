@@ -27,7 +27,7 @@ def test_parse_laptop_with_feature_and_budget():
     assert requirements.required_features == ["16gb ram"]
 
 
-def test_parse_product_with_budget_but_no_med_features():
+def test_parse_product_with_budget_and_front_feature():
     # Arrange
     query = "vandtæt vinterjakke til herre under 1500 kr"
 
@@ -35,9 +35,9 @@ def test_parse_product_with_budget_but_no_med_features():
     requirements = parse_requirements(query)
 
     # Assert
-    assert requirements.product_type == "vandtæt vinterjakke til herre"
+    assert requirements.product_type == "vinterjakke til herre"
     assert requirements.max_price == 1500
-    assert requirements.required_features == []
+    assert requirements.required_features == ["vandtæt"]
 
 
 def test_parse_empty_feature_list_when_no_requirements_found():
