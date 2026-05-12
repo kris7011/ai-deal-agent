@@ -143,7 +143,9 @@ function App() {
               target="_blank"
               rel="noreferrer"
             >
-              Se produkt
+              {item.product.url.includes("google.com")
+                ? "Se via Google Shopping"
+                : "Se produkt hos forhandler"}
             </a>
           </div>
         ))}
