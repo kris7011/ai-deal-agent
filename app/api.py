@@ -8,6 +8,7 @@ from app.explainer import generate_explanation
 from app.product_search import search_products
 from app.requirements_parser import parse_requirements
 from app.scorer import calculate_score
+from app.saved_searches import load_saved_searches, save_search
 
 app = FastAPI()
 
@@ -23,6 +24,12 @@ app.add_middleware(
 class SearchRequest(BaseModel):
     query: str
     allow_live_search: bool = False
+
+
+class SaveSearchRequest(BaseModel):
+    query: str
+    result_count: int
+    best_score: int
 
 
 @app.get("/")
@@ -76,4 +83,30 @@ def search(request: SearchRequest) -> dict:
             "required_features": requirements.required_features,
         },
         "products": scored_products[:10],
+    }
+
+
+@app.get("/api/saved-searches")
+def get_saved_searches() -> dict:
+    saved_searches = load_saved_searches()
+
+    return {
+        "count": len(saved_searches),
+        "saved_searches": saved_searches,
+    }
+
+
+@app.post("/api/saved-searches")
+def create_saved_search(request: SaveSearchRequest) -> dict:
+    requirements = parse_requirements(request.query)
+
+    saved_search = save_search(
+        query=request.query,
+        requirements=requirements,
+        result_count=request.result_count,
+        best_score=request.best_score,
+    )
+
+    return {
+        "saved_search": saved_search,
     }
