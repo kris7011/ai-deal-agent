@@ -321,3 +321,8 @@ h1 {
 .saved-search-delete-button {
   min-width: 110px;
 }
+
+.saved-search-date {
+  color: #9ca3af;
+  font-size: 13px;
+}
