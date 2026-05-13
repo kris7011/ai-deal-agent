@@ -121,7 +121,10 @@ function App() {
         </div>
       )}
 
-      <SavedSearchesPanel savedSearches={savedSearches} />
+      <SavedSearchesPanel
+        savedSearches={savedSearches}
+        onSavedSearchClick={setQuery}
+      />
 
       {products.length === 0 && !loading && !error && (
         <EmptyState

@@ -2,9 +2,13 @@ import type { SavedSearch } from "../types";
 
 type SavedSearchesPanelProps = {
     savedSearches: SavedSearch[];
+    onSavedSearchClick: (query: string) => void;
 };
 
-function SavedSearchesPanel({ savedSearches }: SavedSearchesPanelProps) {
+function SavedSearchesPanel({
+    savedSearches,
+    onSavedSearchClick,
+}: SavedSearchesPanelProps) {
     if (savedSearches.length === 0) {
         return null;
     }
@@ -15,7 +19,10 @@ function SavedSearchesPanel({ savedSearches }: SavedSearchesPanelProps) {
 
             <div className="saved-searches-list">
                 {savedSearches.map((savedSearch) => (
-                    <div key={`${savedSearch.query}-${savedSearch.created_at}`} className="saved-search-card">
+                    <div
+                        key={`${savedSearch.query}-${savedSearch.created_at}`}
+                        className="saved-search-card"
+                    >
                         <h3>{savedSearch.query}</h3>
 
                         <p>Produkt: {savedSearch.product_type}</p>
@@ -36,6 +43,14 @@ function SavedSearchesPanel({ savedSearches }: SavedSearchesPanelProps) {
 
                         <p>Resultater: {savedSearch.result_count}</p>
                         <p>Bedste score: {savedSearch.best_score}/100</p>
+
+                        <button
+                            type="button"
+                            className="saved-search-use-button"
+                            onClick={() => onSavedSearchClick(savedSearch.query)}
+                        >
+                            Brug søgning
+                        </button>
                     </div>
                 ))}
             </div>
