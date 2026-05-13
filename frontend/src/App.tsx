@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 import ProductCard from "./components/ProductCard";
+import SearchSection from "./components/SearchSection";
 import type { ProductResult, SearchRequirements } from "./types";
 import { searchProductsApi } from "./api";
 
@@ -53,39 +54,16 @@ function App() {
     <div className="page">
       <h1>AI Deal Agent</h1>
 
-      <div className="search-section">
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Søg efter produkter..."
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-
-          <button onClick={searchProducts} disabled={loading}>
-            {loading ? "Søger..." : "Søg"}
-          </button>
-        </div>
-
-        <label className="live-search-toggle">
-          <input
-            type="checkbox"
-            checked={allowLiveSearch}
-            onChange={(event) => setAllowLiveSearch(event.target.checked)}
-          />
-          Tillad live-søgning hvis cache mangler
-        </label>
-
-        {error && <p className="error-message">{error}</p>}
-
-        {usedCache !== null && (
-          <p className="search-source">
-            {usedCache
-              ? "Resultater hentet fra cache. Ingen SerpAPI-søgning brugt."
-              : "Ny live-søgning udført og gemt i cache."}
-          </p>
-        )}
-      </div>
+      <SearchSection
+        query={query}
+        loading={loading}
+        error={error}
+        allowLiveSearch={allowLiveSearch}
+        usedCache={usedCache}
+        onQueryChange={setQuery}
+        onAllowLiveSearchChange={setAllowLiveSearch}
+        onSearch={searchProducts}
+      />
 
       {requirements && (
         <div className="requirements-summary">
