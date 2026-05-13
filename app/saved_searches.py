@@ -29,6 +29,16 @@ def save_search(
 ) -> dict:
     path = Path(storage_path)
 
+    saved_searches = load_saved_searches(path)
+
+    normalized_query = _normalize_query(query)
+
+    for saved_search in saved_searches:
+        existing_query = saved_search.get("query", "")
+
+        if _normalize_query(existing_query) == normalized_query:
+            return saved_search
+
     saved_search = {
         "id": str(uuid4()),
         "query": query,
@@ -40,7 +50,6 @@ def save_search(
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
-    saved_searches = load_saved_searches(path)
     saved_searches.append(saved_search)
 
     path.parent.mkdir(exist_ok=True)
@@ -74,3 +83,7 @@ def delete_saved_search(
         json.dump(updated_saved_searches, file, indent=2, ensure_ascii=False)
 
     return True
+
+
+def _normalize_query(query: str) -> str:
+    return " ".join(query.lower().split())

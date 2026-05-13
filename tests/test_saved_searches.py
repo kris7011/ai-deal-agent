@@ -94,31 +94,38 @@ def test_save_search_appends_to_existing_file(tmp_path):
     assert saved_searches[1]["query"] == second_requirements.raw_query
 
 
-def test_save_search_creates_unique_ids(tmp_path):
+def test_save_search_creates_unique_ids_for_different_queries(tmp_path):
     # Arrange
     storage_path = tmp_path / "saved_searches.json"
 
-    requirements = SearchRequirements(
+    first_requirements = SearchRequirements(
         product_type="laptop",
         max_price=8000,
         required_features=["16gb ram"],
         raw_query="laptop med 16GB RAM under 8000 kr",
     )
 
+    second_requirements = SearchRequirements(
+        product_type="powerbank",
+        max_price=None,
+        required_features=["usb-c"],
+        raw_query="powerbank med usb-c",
+    )
+
     # Act
     save_search(
-        query=requirements.raw_query,
-        requirements=requirements,
+        query=first_requirements.raw_query,
+        requirements=first_requirements,
         result_count=10,
         best_score=80,
         storage_path=storage_path,
     )
 
     save_search(
-        query=requirements.raw_query,
-        requirements=requirements,
-        result_count=10,
-        best_score=80,
+        query=second_requirements.raw_query,
+        requirements=second_requirements,
+        result_count=5,
+        best_score=65,
         storage_path=storage_path,
     )
 
@@ -127,6 +134,7 @@ def test_save_search_creates_unique_ids(tmp_path):
     # Assert
     assert len(saved_searches) == 2
     assert saved_searches[0]["id"] != saved_searches[1]["id"]
+
 
 def test_delete_saved_search_removes_existing_search(tmp_path):
     # Arrange
@@ -190,3 +198,38 @@ def test_delete_saved_search_returns_false_when_id_does_not_exist(tmp_path):
     # Assert
     assert deleted is False
     assert len(saved_searches) == 1
+
+
+def test_save_search_does_not_create_duplicate_for_same_query(tmp_path):
+    # Arrange
+    storage_path = tmp_path / "saved_searches.json"
+
+    requirements = SearchRequirements(
+        product_type="robotstøvsuger",
+        max_price=None,
+        required_features=["moppe", "høj sugeevne"],
+        raw_query="robotstøvsuger med moppe og høj sugeevne",
+    )
+
+    # Act
+    first_saved_search = save_search(
+        query=requirements.raw_query,
+        requirements=requirements,
+        result_count=40,
+        best_score=47,
+        storage_path=storage_path,
+    )
+
+    second_saved_search = save_search(
+        query=requirements.raw_query,
+        requirements=requirements,
+        result_count=40,
+        best_score=47,
+        storage_path=storage_path,
+    )
+
+    saved_searches = load_saved_searches(storage_path)
+
+    # Assert
+    assert len(saved_searches) == 1
+    assert first_saved_search["id"] == second_saved_search["id"]
