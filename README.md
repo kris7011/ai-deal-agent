@@ -36,6 +36,11 @@ It then searches for products, scores them, and presents the results in a websho
 - Recommendation explanations
 - Parsed search requirements shown in the UI
 - Feature matching with simple Danish/English synonym support
+- Saved searches
+- Reuse saved searches
+- Run saved searches again
+- Delete saved searches
+- Duplicate protection for saved searches
 - Backend tests with pytest
 
 ---
@@ -77,11 +82,15 @@ ai-deal-agent/
 │   ├── product_search.py
 │   ├── requirements.py
 │   ├── requirements_parser.py
+│   ├── saved_searches.py
 │   ├── scorer.py
 │   └── settings.py
 │
 ├── cache/
 │   └── cached SerpAPI responses
+│
+├── data/
+│   └── runtime saved search data
 │
 ├── frontend/
 │   ├── src/
@@ -90,6 +99,7 @@ ai-deal-agent/
 │   │   │   ├── ProductCard.tsx
 │   │   │   ├── ProductGrid.tsx
 │   │   │   ├── RequirementsSummary.tsx
+│   │   │   ├── SavedSearchesPanel.tsx
 │   │   │   └── SearchSection.tsx
 │   │   ├── api.ts
 │   │   ├── App.tsx
@@ -102,6 +112,7 @@ ai-deal-agent/
 ├── tests/
 │   ├── test_feature_matcher.py
 │   ├── test_requirements_parser.py
+│   ├── test_saved_searches.py
 │   └── test_scorer.py
 │
 ├── .env.example
@@ -133,6 +144,20 @@ Product scoring
 Badges and explanations
         ↓
 Frontend product cards
+```
+
+Saved searches follow this flow:
+
+```txt
+Completed search
+        ↓
+Save search
+        ↓
+Store query, parsed requirements, result count and best score
+        ↓
+Show saved searches in frontend
+        ↓
+Reuse, run again or delete saved search
 ```
 
 ---
@@ -266,7 +291,9 @@ After testing live search, set `ALLOW_LIVE_SEARCH` back to `false`.
 
 ## API Usage
 
-The main endpoint is:
+### Product Search
+
+The main search endpoint is:
 
 ```txt
 POST /api/search
@@ -317,6 +344,44 @@ Example response structure:
       ]
     }
   ]
+}
+```
+
+### Saved Searches Endpoints
+
+```txt
+GET /api/saved-searches
+POST /api/saved-searches
+DELETE /api/saved-searches/{saved_search_id}
+```
+
+Example save search request:
+
+```json
+{
+  "query": "robotstøvsuger med moppe og høj sugeevne",
+  "result_count": 40,
+  "best_score": 75
+}
+```
+
+Example saved search response:
+
+```json
+{
+  "saved_search": {
+    "id": "example-id",
+    "query": "robotstøvsuger med moppe og høj sugeevne",
+    "product_type": "robotstøvsuger",
+    "max_price": null,
+    "required_features": [
+      "moppe",
+      "høj sugeevne"
+    ],
+    "result_count": 40,
+    "best_score": 75,
+    "created_at": "2026-05-13T10:00:00+00:00"
+  }
 }
 ```
 
@@ -372,6 +437,53 @@ and the frontend request sends:
 ```
 
 This prevents accidental API usage during development.
+
+---
+
+## Saved Searches
+
+The application supports saved searches.
+
+A saved search includes:
+
+- Unique id
+- Query text
+- Parsed product type
+- Maximum price
+- Required features
+- Result count
+- Best score
+- Creation timestamp
+
+Saved searches are stored locally in:
+
+```txt
+data/saved_searches.json
+```
+
+The `data/` folder is ignored by Git because it contains runtime data.
+
+The saved search feature currently supports:
+
+- Saving a search
+- Listing saved searches
+- Reusing a saved search in the search input
+- Running a saved search again
+- Deleting a saved search
+- Preventing duplicate saved searches
+- Sorting saved searches newest first
+
+The relevant backend logic is located in:
+
+```txt
+app/saved_searches.py
+```
+
+The relevant frontend component is located in:
+
+```txt
+frontend/src/components/SavedSearchesPanel.tsx
+```
 
 ---
 
@@ -470,6 +582,7 @@ Current test coverage includes:
 - Requirements parsing
 - Product scoring
 - Feature matching
+- Saved searches
 
 ---
 
@@ -512,7 +625,8 @@ The project is intentionally built in small layers:
 6. Explanations
 7. Badges
 8. Frontend presentation
-9. Tests
+9. Saved searches
+10. Tests
 
 This makes the system easier to understand, debug, and extend.
 
@@ -524,7 +638,8 @@ This makes the system easier to understand, debug, and extend.
 - Product specifications are limited to what Google Shopping returns.
 - Feature matching is still rule-based and not yet powered by an LLM.
 - The search parser is simple and does not fully understand complex natural language.
-- There is no user login, database, or saved search history yet.
+- Saved searches are stored in a local JSON file rather than a database.
+- There is no user login or multi-user support yet.
 - There is no price history tracking yet.
 - There is no production deployment yet.
 
@@ -534,7 +649,7 @@ This makes the system easier to understand, debug, and extend.
 
 - Direct retailer link lookup
 - Price history tracking
-- Saved searches
+- Saved searches backed by a database
 - Email or push notifications for price drops
 - Affiliate link support
 - LLM-based requirement parsing
@@ -561,4 +676,5 @@ It demonstrates:
 - Caching strategy
 - Test-driven improvements
 - Basic recommendation logic
+- Local persistence with JSON storage
 - A practical AI-agent style architecture
