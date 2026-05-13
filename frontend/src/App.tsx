@@ -76,6 +76,17 @@ function App() {
       return;
     }
 
+    const normalizedCurrentQuery = normalizeQuery(query);
+
+    const alreadySaved = savedSearches.some(
+      (savedSearch) => normalizeQuery(savedSearch.query) === normalizedCurrentQuery
+    );
+
+    if (alreadySaved) {
+      setSaveMessage("Søgningen er allerede gemt.");
+      return;
+    }
+
     const bestScore = products[0]?.score ?? 0;
 
     try {
@@ -109,6 +120,10 @@ function App() {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  function normalizeQuery(value: string) {
+    return value.toLowerCase().trim().replace(/\s+/g, " ");
   }
 
   return (
