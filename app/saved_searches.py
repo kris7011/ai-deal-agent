@@ -49,3 +49,28 @@ def save_search(
         json.dump(saved_searches, file, indent=2, ensure_ascii=False)
 
     return saved_search
+
+
+def delete_saved_search(
+    saved_search_id: str,
+    storage_path: Path | str = DEFAULT_STORAGE_PATH,
+) -> bool:
+    path = Path(storage_path)
+
+    saved_searches = load_saved_searches(path)
+
+    updated_saved_searches = [
+        saved_search
+        for saved_search in saved_searches
+        if saved_search.get("id") != saved_search_id
+    ]
+
+    if len(updated_saved_searches) == len(saved_searches):
+        return False
+
+    path.parent.mkdir(exist_ok=True)
+
+    with open(path, "w", encoding="utf-8") as file:
+        json.dump(updated_saved_searches, file, indent=2, ensure_ascii=False)
+
+    return True

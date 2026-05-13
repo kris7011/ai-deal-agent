@@ -8,7 +8,7 @@ from app.explainer import generate_explanation
 from app.product_search import search_products
 from app.requirements_parser import parse_requirements
 from app.scorer import calculate_score
-from app.saved_searches import load_saved_searches, save_search
+from app.saved_searches import delete_saved_search, load_saved_searches, save_search
 
 app = FastAPI()
 
@@ -109,4 +109,20 @@ def create_saved_search(request: SaveSearchRequest) -> dict:
 
     return {
         "saved_search": saved_search,
+    }
+
+
+@app.delete("/api/saved-searches/{saved_search_id}")
+def remove_saved_search(saved_search_id: str) -> dict:
+    deleted = delete_saved_search(saved_search_id)
+
+    if not deleted:
+        raise HTTPException(
+            status_code=404,
+            detail="Saved search not found.",
+        )
+
+    return {
+        "deleted": True,
+        "id": saved_search_id,
     }
