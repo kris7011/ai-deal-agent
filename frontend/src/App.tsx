@@ -109,7 +109,7 @@ function App() {
         usedCache={usedCache}
         onQueryChange={setQuery}
         onAllowLiveSearchChange={setAllowLiveSearch}
-        onSearch={searchProducts}
+        onSearch={() => searchProducts()}
       />
 
       {requirements && <RequirementsSummary requirements={requirements} />}
