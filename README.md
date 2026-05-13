@@ -18,7 +18,7 @@ Required features: moppe, høj sugeevne
 Max price: not specified
 ```
 
-It then searches for products, scores them, and presents the results in a webshop like interface.
+It then searches for products, scores them, and presents the results in a webshop-like interface.
 
 ---
 
@@ -29,6 +29,8 @@ It then searches for products, scores them, and presents the results in a websho
 - SerpAPI Google Shopping integration
 - Local cache to avoid unnecessary API calls
 - Controlled live search to protect API quota
+- Configurable frontend API base URL
+- Configurable backend CORS origins
 - Product scoring
 - Product badges
 - Recommendation explanations
@@ -75,7 +77,8 @@ ai-deal-agent/
 │   ├── product_search.py
 │   ├── requirements.py
 │   ├── requirements_parser.py
-│   └── scorer.py
+│   ├── scorer.py
+│   └── settings.py
 │
 ├── cache/
 │   └── cached SerpAPI responses
@@ -84,6 +87,7 @@ ai-deal-agent/
 │   ├── src/
 │   │   ├── App.tsx
 │   │   └── App.css
+│   ├── .env.example
 │   └── package.json
 │
 ├── tests/
@@ -91,7 +95,7 @@ ai-deal-agent/
 │   ├── test_requirements_parser.py
 │   └── test_scorer.py
 │
-├── .env
+├── .env.example
 ├── .gitignore
 ├── pytest.ini
 ├── requirements.txt
@@ -132,11 +136,14 @@ Install Python dependencies:
 pip install -r requirements.txt
 ```
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root.
+
+Use `.env.example` as a template:
 
 ```txt
 SERPAPI_API_KEY=your_serpapi_key_here
 ALLOW_LIVE_SEARCH=false
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```
 
 Do not commit `.env` to GitHub.
@@ -169,6 +176,14 @@ Go to the frontend folder:
 cd frontend
 ```
 
+Create a `.env` file inside the `frontend` folder.
+
+Use `frontend/.env.example` as a template:
+
+```txt
+VITE_API_BASE_URL=http://127.0.0.1:8000
+```
+
 Install dependencies:
 
 ```bash
@@ -186,6 +201,57 @@ The frontend will run at:
 ```txt
 http://localhost:5173
 ```
+
+---
+
+## Local Development
+
+For local development, run the backend and frontend in two separate terminals.
+
+### Terminal 1: Backend
+
+From the project root:
+
+```bash
+uvicorn app.api:app --reload
+```
+
+### Terminal 2: Frontend
+
+From the project root:
+
+```bash
+cd frontend
+npm run dev
+```
+
+Then open:
+
+```txt
+http://localhost:5173
+```
+
+For normal development, keep live search disabled:
+
+```txt
+ALLOW_LIVE_SEARCH=false
+```
+
+Use cached searches while developing. Only enable live search when you intentionally want to spend a SerpAPI request.
+
+To allow a new live search, both conditions must be true:
+
+```txt
+ALLOW_LIVE_SEARCH=true
+```
+
+and the frontend checkbox must be enabled:
+
+```txt
+Tillad live-søgning hvis cache mangler
+```
+
+After testing live search, set `ALLOW_LIVE_SEARCH` back to `false`.
 
 ---
 
@@ -279,7 +345,7 @@ This prevents new SerpAPI calls globally.
 The frontend has a checkbox:
 
 ```txt
-Allow live search if cache is missing
+Tillad live-søgning hvis cache mangler
 ```
 
 A live SerpAPI call is only made when:
