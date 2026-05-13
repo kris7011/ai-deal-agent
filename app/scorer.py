@@ -1,5 +1,6 @@
 from app.models import Product
 from app.requirements import SearchRequirements
+from app.feature_matcher import product_matches_feature
 
 
 def calculate_score(product: Product, requirements: SearchRequirements) -> int:
@@ -48,19 +49,7 @@ def _calculate_feature_score(
     matched_features = 0
 
     for feature in requirements.required_features:
-        if _product_matches_feature(product, feature):
+        if product_matches_feature(product, feature):
             matched_features += 1
 
     return int((matched_features / len(requirements.required_features)) * 55)
-
-
-def _product_matches_feature(product: Product, feature: str) -> bool:
-    searchable_text = f"{product.name} {product.source}".lower()
-    feature = feature.lower()
-
-    if feature in searchable_text:
-        return True
-
-    feature_words = [word for word in feature.split() if len(word) > 2]
-
-    return any(word in searchable_text for word in feature_words)
