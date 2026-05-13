@@ -5,7 +5,7 @@ import RequirementsSummary from "./components/RequirementsSummary";
 import EmptyState from "./components/EmptyState";
 import ProductGrid from "./components/ProductGrid";
 import type { ProductResult, SearchRequirements } from "./types";
-import { searchProductsApi } from "./api";
+import { saveSearchApi, searchProductsApi } from "./api";
 
 function App() {
   const [query, setQuery] = useState("");
@@ -15,6 +15,8 @@ function App() {
   const [allowLiveSearch, setAllowLiveSearch] = useState(false);
   const [usedCache, setUsedCache] = useState<boolean | null>(null);
   const [requirements, setRequirements] = useState<SearchRequirements | null>(null);
+  const [resultCount, setResultCount] = useState(0);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const exampleQueries = [
     "robotstøvsuger med moppe og høj sugeevne",
@@ -33,12 +35,15 @@ function App() {
     setProducts([]);
     setUsedCache(null);
     setRequirements(null);
+    setResultCount(0);
+    setSaveMessage(null);
 
     try {
       const data = await searchProductsApi(query, allowLiveSearch);
       setProducts(data.products);
       setUsedCache(data.used_cache);
       setRequirements(data.requirements);
+      setResultCount(data.count);
     } catch (error) {
       console.error(error);
 
@@ -49,6 +54,27 @@ function App() {
       }
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function saveCurrentSearch() {
+    if (!query.trim() || products.length === 0) {
+      return;
+    }
+
+    const bestScore = products[0]?.score ?? 0;
+
+    try {
+      await saveSearchApi(query, resultCount, bestScore);
+      setSaveMessage("Søgningen er gemt.");
+    } catch (error) {
+      console.error(error);
+
+      if (error instanceof Error) {
+        setSaveMessage(error.message);
+      } else {
+        setSaveMessage("Kunne ikke gemme søgningen.");
+      }
     }
   }
 
@@ -68,6 +94,16 @@ function App() {
       />
 
       {requirements && <RequirementsSummary requirements={requirements} />}
+
+      {products.length > 0 && (
+        <div className="save-search-section">
+          <button type="button" onClick={saveCurrentSearch}>
+            Gem søgning
+          </button>
+
+          {saveMessage && <p>{saveMessage}</p>}
+        </div>
+      )}
 
       {products.length === 0 && !loading && !error && (
         <EmptyState

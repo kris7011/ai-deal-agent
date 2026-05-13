@@ -201,3 +201,30 @@ h1 {
 .example-queries button:hover {
   background-color: #312e81;
 }
+
+.save-search-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 1rem 0 2rem;
+}
+
+.save-search-section button {
+  border: none;
+  border-radius: 10px;
+  background-color: #16a34a;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 10px 16px;
+}
+
+.save-search-section button:hover {
+  background-color: #22c55e;
+}
+
+.save-search-section p {
+  color: #a7f3d0;
+  font-size: 14px;
+  margin: 0;
+}
