@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./App.css";
 import ProductCard from "./components/ProductCard";
 import type { ProductResult, SearchRequirements } from "./types";
+import { searchProductsApi } from "./api";
 
 function App() {
   const [query, setQuery] = useState("");
@@ -31,25 +32,7 @@ function App() {
     setRequirements(null);
 
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-
-      const response = await fetch(`${apiBaseUrl}/api/search`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query,
-          allow_live_search: allowLiveSearch,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail ?? "Søgningen fejlede.");
-      }
-
+      const data = await searchProductsApi(query, allowLiveSearch);
       setProducts(data.products);
       setUsedCache(data.used_cache);
       setRequirements(data.requirements);
