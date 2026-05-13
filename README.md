@@ -85,8 +85,17 @@ ai-deal-agent/
 │
 ├── frontend/
 │   ├── src/
+│   │   ├── components/
+│   │   │   ├── EmptyState.tsx
+│   │   │   ├── ProductCard.tsx
+│   │   │   ├── ProductGrid.tsx
+│   │   │   ├── RequirementsSummary.tsx
+│   │   │   └── SearchSection.tsx
+│   │   ├── api.ts
 │   │   ├── App.tsx
-│   │   └── App.css
+│   │   ├── App.css
+│   │   ├── main.tsx
+│   │   └── types.ts
 │   ├── .env.example
 │   └── package.json
 │
@@ -450,7 +459,7 @@ app/badge_generator.py
 
 ## Running Tests
 
-Run all tests:
+Run all backend tests from the project root:
 
 ```bash
 python -m pytest
@@ -461,6 +470,33 @@ Current test coverage includes:
 - Requirements parsing
 - Product scoring
 - Feature matching
+
+---
+
+## Quality Checks
+
+Run backend tests from the project root:
+
+```bash
+python -m pytest
+```
+
+Build the frontend from the frontend folder:
+
+```bash
+cd frontend
+npm run build
+```
+
+A healthy project state should have:
+
+```txt
+Backend tests passing
+Frontend production build passing
+Git working tree clean
+```
+
+If the frontend build fails because of local path or sync-folder issues, run the build from the actual project folder path used by your system.
 
 ---
 
