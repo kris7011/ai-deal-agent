@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./App.css";
 import ProductCard from "./components/ProductCard";
 import SearchSection from "./components/SearchSection";
+import RequirementsSummary from "./components/RequirementsSummary";
 import type { ProductResult, SearchRequirements } from "./types";
 import { searchProductsApi } from "./api";
 
@@ -65,26 +66,7 @@ function App() {
         onSearch={searchProducts}
       />
 
-      {requirements && (
-        <div className="requirements-summary">
-          <p>
-            <strong>Agenten forstod søgningen som:</strong>
-          </p>
-          <p>Produkt: {requirements.product_type}</p>
-          <p>
-            Makspris:{" "}
-            {requirements.max_price
-              ? `${requirements.max_price} kr.`
-              : "Ikke angivet"}
-          </p>
-          <p>
-            Krav:{" "}
-            {requirements.required_features.length > 0
-              ? requirements.required_features.join(", ")
-              : "Ingen specifikke krav fundet"}
-          </p>
-        </div>
-      )}
+      {requirements && <RequirementsSummary requirements={requirements} />}
 
       {products.length === 0 && !loading && !error && (
         <div className="empty-state">
