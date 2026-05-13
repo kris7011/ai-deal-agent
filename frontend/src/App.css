@@ -274,6 +274,22 @@ h1 {
   padding: 8px 12px;
 }
 
-.saved-search-use-button:hover {
-  background-color: #6366f1;
+.saved-search-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 0.75rem;
+}
+
+.saved-search-run-button {
+  border: none;
+  border-radius: 10px;
+  background-color: #16a34a;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 8px 12px;
+}
+
+.saved-search-run-button:hover {
+  background-color: #22c55e;
 }

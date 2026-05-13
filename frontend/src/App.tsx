@@ -30,12 +30,15 @@ function App() {
     loadSavedSearches();
   }, []);
 
-  async function searchProducts() {
-    if (!query.trim()) {
+  async function searchProducts(searchQuery: string = query) {
+    const queryToSearch = searchQuery.trim();
+
+    if (!queryToSearch) {
       setError("Skriv hvad du leder efter først.");
       return;
     }
 
+    setQuery(queryToSearch);
     setError(null);
     setLoading(true);
     setProducts([]);
@@ -45,7 +48,7 @@ function App() {
     setSaveMessage(null);
 
     try {
-      const data = await searchProductsApi(query, allowLiveSearch);
+      const data = await searchProductsApi(queryToSearch, allowLiveSearch);
       setProducts(data.products);
       setUsedCache(data.used_cache);
       setRequirements(data.requirements);
@@ -124,6 +127,7 @@ function App() {
       <SavedSearchesPanel
         savedSearches={savedSearches}
         onSavedSearchClick={setQuery}
+        onRunSavedSearch={searchProducts}
       />
 
       {products.length === 0 && !loading && !error && (
