@@ -2,6 +2,8 @@
 
 AI Deal Agent is a full-stack prototype for an AI-assisted product search and deal recommendation tool.
 
+Current version: v1.0
+
 The goal is to let a user describe what they are looking for in natural language, and then return relevant product suggestions with prices, images, match scores, badges, and explanations.
 
 Example search:
