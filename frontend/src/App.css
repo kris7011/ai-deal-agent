@@ -228,3 +228,37 @@ h1 {
   font-size: 14px;
   margin: 0;
 }
+
+.saved-searches-panel {
+  background-color: #1f2937;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.saved-searches-panel h2 {
+  margin-top: 0;
+}
+
+.saved-searches-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.saved-search-card {
+  background-color: #111827;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.saved-search-card h3 {
+  margin-top: 0;
+  font-size: 16px;
+}
+
+.saved-search-card p {
+  color: #d1d5db;
+  font-size: 14px;
+  margin: 6px 0;
+}

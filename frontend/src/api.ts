@@ -1,4 +1,4 @@
-import type { ProductResult, SearchRequirements } from "./types";
+import type { ProductResult, SavedSearch, SearchRequirements } from "./types";
 
 export type SearchResponse = {
     query: string;
@@ -18,6 +18,11 @@ export type SaveSearchResponse = {
         best_score: number;
         created_at: string;
     };
+};
+
+export type GetSavedSearchesResponse = {
+    count: number;
+    saved_searches: SavedSearch[];
 };
 
 export async function searchProductsApi(
@@ -69,6 +74,20 @@ export async function saveSearchApi(
 
     if (!response.ok) {
         throw new Error(data.detail ?? "Kunne ikke gemme søgningen.");
+    }
+
+    return data;
+}
+
+export async function getSavedSearchesApi(): Promise<GetSavedSearchesResponse> {
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
+    const response = await fetch(`${apiBaseUrl}/api/saved-searches`);
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.detail ?? "Kunne ikke hente gemte søgninger.");
     }
 
     return data;

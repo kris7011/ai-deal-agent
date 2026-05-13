@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import SearchSection from "./components/SearchSection";
 import RequirementsSummary from "./components/RequirementsSummary";
 import EmptyState from "./components/EmptyState";
 import ProductGrid from "./components/ProductGrid";
-import type { ProductResult, SearchRequirements } from "./types";
-import { saveSearchApi, searchProductsApi } from "./api";
+import SavedSearchesPanel from "./components/SavedSearchesPanel";
+import { getSavedSearchesApi, saveSearchApi, searchProductsApi } from "./api";
+import type { ProductResult, SavedSearch, SearchRequirements } from "./types";
 
 function App() {
   const [query, setQuery] = useState("");
@@ -17,12 +18,17 @@ function App() {
   const [requirements, setRequirements] = useState<SearchRequirements | null>(null);
   const [resultCount, setResultCount] = useState(0);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
 
   const exampleQueries = [
     "robotstøvsuger med moppe og høj sugeevne",
     "laptop til programmering med 16GB RAM under 8000 kr",
     "vandtæt vinterjakke til herre under 1500 kr",
   ];
+
+  useEffect(() => {
+    loadSavedSearches();
+  }, []);
 
   async function searchProducts() {
     if (!query.trim()) {
@@ -67,6 +73,7 @@ function App() {
     try {
       await saveSearchApi(query, resultCount, bestScore);
       setSaveMessage("Søgningen er gemt.");
+      await loadSavedSearches();
     } catch (error) {
       console.error(error);
 
@@ -75,6 +82,15 @@ function App() {
       } else {
         setSaveMessage("Kunne ikke gemme søgningen.");
       }
+    }
+  }
+
+  async function loadSavedSearches() {
+    try {
+      const data = await getSavedSearchesApi();
+      setSavedSearches(data.saved_searches);
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -104,6 +120,8 @@ function App() {
           {saveMessage && <p>{saveMessage}</p>}
         </div>
       )}
+
+      <SavedSearchesPanel savedSearches={savedSearches} />
 
       {products.length === 0 && !loading && !error && (
         <EmptyState
