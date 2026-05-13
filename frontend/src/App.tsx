@@ -31,6 +31,12 @@ function App() {
   const [usedCache, setUsedCache] = useState<boolean | null>(null);
   const [requirements, setRequirements] = useState<SearchRequirements | null>(null);
 
+  const exampleQueries = [
+    "robotstøvsuger med moppe og høj sugeevne",
+    "laptop til programmering med 16GB RAM under 8000 kr",
+    "vandtæt vinterjakke til herre under 1500 kr",
+  ];
+
   async function searchProducts() {
     if (!query.trim()) {
       setError("Skriv hvad du leder efter først.");
@@ -135,6 +141,28 @@ function App() {
               ? requirements.required_features.join(", ")
               : "Ingen specifikke krav fundet"}
           </p>
+        </div>
+      )}
+
+      {products.length === 0 && !loading && !error && (
+        <div className="empty-state">
+          <h2>Hvad leder du efter?</h2>
+          <p>
+            Skriv et produkt og dine krav. Agenten forsøger at finde relevante produkter,
+            score dem og forklare hvorfor de matcher.
+          </p>
+
+          <div className="example-queries">
+            {exampleQueries.map((example) => (
+              <button
+                key={example}
+                type="button"
+                onClick={() => setQuery(example)}
+              >
+                {example}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

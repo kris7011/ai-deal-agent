@@ -165,3 +165,39 @@ h1 {
 .requirements-summary p {
   margin: 4px 0;
 }
+
+.empty-state {
+  background-color: #1f2937;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.empty-state h2 {
+  margin-top: 0;
+}
+
+.empty-state p {
+  color: #d1d5db;
+  max-width: 700px;
+}
+
+.example-queries {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.example-queries button {
+  border: 1px solid #4f46e5;
+  background-color: transparent;
+  color: #c7d2fe;
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.example-queries button:hover {
+  background-color: #312e81;
+}
