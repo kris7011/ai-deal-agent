@@ -59,3 +59,46 @@ def test_product_matches_feature_case_insensitive():
 
     # Assert
     assert result is True
+
+def test_product_matches_danish_feature_with_english_synonym():
+    # Arrange
+    product = create_product("Wireless gaming mouse")
+
+    # Act
+    result = product_matches_feature(product, "trådløs")
+
+    # Assert
+    assert result is True
+
+
+def test_product_matches_waterproof_synonym():
+    # Arrange
+    product = create_product("Waterproof winter jacket")
+
+    # Act
+    result = product_matches_feature(product, "vandtæt")
+
+    # Assert
+    assert result is True
+
+
+def test_product_matches_usb_c_variation():
+    # Arrange
+    product = create_product("Powerbank with USB C fast charging")
+
+    # Act
+    result = product_matches_feature(product, "usb-c")
+
+    # Assert
+    assert result is True
+
+
+def test_product_matches_quiet_synonym():
+    # Arrange
+    product = create_product("Quiet coffee machine with timer")
+
+    # Act
+    result = product_matches_feature(product, "støjsvag")
+
+    # Assert
+    assert result is True
