@@ -40,6 +40,8 @@ def test_save_search_creates_file_and_stores_search(tmp_path):
 
     saved_search = saved_searches[0]
 
+    assert "id" in saved_search
+    assert saved_search["id"]
     assert saved_search["query"] == requirements.raw_query
     assert saved_search["product_type"] == "laptop til programmering"
     assert saved_search["max_price"] == 8000
@@ -90,3 +92,38 @@ def test_save_search_appends_to_existing_file(tmp_path):
     assert len(saved_searches) == 2
     assert saved_searches[0]["query"] == first_requirements.raw_query
     assert saved_searches[1]["query"] == second_requirements.raw_query
+
+
+def test_save_search_creates_unique_ids(tmp_path):
+    # Arrange
+    storage_path = tmp_path / "saved_searches.json"
+
+    requirements = SearchRequirements(
+        product_type="laptop",
+        max_price=8000,
+        required_features=["16gb ram"],
+        raw_query="laptop med 16GB RAM under 8000 kr",
+    )
+
+    # Act
+    save_search(
+        query=requirements.raw_query,
+        requirements=requirements,
+        result_count=10,
+        best_score=80,
+        storage_path=storage_path,
+    )
+
+    save_search(
+        query=requirements.raw_query,
+        requirements=requirements,
+        result_count=10,
+        best_score=80,
+        storage_path=storage_path,
+    )
+
+    saved_searches = load_saved_searches(storage_path)
+
+    # Assert
+    assert len(saved_searches) == 2
+    assert saved_searches[0]["id"] != saved_searches[1]["id"]

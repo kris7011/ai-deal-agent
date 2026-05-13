@@ -1,6 +1,7 @@
 import json
 from datetime import datetime, timezone
 from pathlib import Path
+from uuid import uuid4
 
 from app.requirements import SearchRequirements
 
@@ -29,6 +30,7 @@ def save_search(
     path = Path(storage_path)
 
     saved_search = {
+        "id": str(uuid4()),
         "query": query,
         "product_type": requirements.product_type,
         "max_price": requirements.max_price,
