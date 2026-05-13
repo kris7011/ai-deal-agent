@@ -3,6 +3,7 @@ import "./App.css";
 import ProductCard from "./components/ProductCard";
 import SearchSection from "./components/SearchSection";
 import RequirementsSummary from "./components/RequirementsSummary";
+import EmptyState from "./components/EmptyState";
 import type { ProductResult, SearchRequirements } from "./types";
 import { searchProductsApi } from "./api";
 
@@ -69,25 +70,10 @@ function App() {
       {requirements && <RequirementsSummary requirements={requirements} />}
 
       {products.length === 0 && !loading && !error && (
-        <div className="empty-state">
-          <h2>Hvad leder du efter?</h2>
-          <p>
-            Skriv et produkt og dine krav. Agenten forsøger at finde relevante produkter,
-            score dem og forklare hvorfor de matcher.
-          </p>
-
-          <div className="example-queries">
-            {exampleQueries.map((example) => (
-              <button
-                key={example}
-                type="button"
-                onClick={() => setQuery(example)}
-              >
-                {example}
-              </button>
-            ))}
-          </div>
-        </div>
+        <EmptyState
+          exampleQueries={exampleQueries}
+          onExampleClick={setQuery}
+        />
       )}
 
       {loading && <p>Loader...</p>}
