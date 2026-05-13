@@ -293,3 +293,31 @@ h1 {
 .saved-search-run-button:hover {
   background-color: #22c55e;
 }
+
+.saved-search-delete-button {
+  border: none;
+  border-radius: 10px;
+  background-color: #dc2626;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 8px 12px;
+}
+
+.saved-search-delete-button:hover {
+  background-color: #ef4444;
+}
+
+.saved-search-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 0.75rem;
+}
+
+.saved-search-use-button,
+.saved-search-run-button,
+.saved-search-delete-button {
+  min-width: 110px;
+}

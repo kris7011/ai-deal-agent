@@ -20,6 +20,7 @@ export type SearchRequirements = {
 };
 
 export type SavedSearch = {
+    id: string;
     query: string;
     product_type: string;
     max_price: number | null;

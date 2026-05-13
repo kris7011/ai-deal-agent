@@ -92,3 +92,17 @@ export async function getSavedSearchesApi(): Promise<GetSavedSearchesResponse> {
 
     return data;
 }
+
+export async function deleteSavedSearchApi(savedSearchId: string): Promise<void> {
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
+    const response = await fetch(`${apiBaseUrl}/api/saved-searches/${savedSearchId}`, {
+        method: "DELETE",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.detail ?? "Kunne ikke slette søgningen.");
+    }
+}

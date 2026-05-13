@@ -5,7 +5,12 @@ import RequirementsSummary from "./components/RequirementsSummary";
 import EmptyState from "./components/EmptyState";
 import ProductGrid from "./components/ProductGrid";
 import SavedSearchesPanel from "./components/SavedSearchesPanel";
-import { getSavedSearchesApi, saveSearchApi, searchProductsApi } from "./api";
+import {
+  deleteSavedSearchApi,
+  getSavedSearchesApi,
+  saveSearchApi,
+  searchProductsApi,
+} from "./api";
 import type { ProductResult, SavedSearch, SearchRequirements } from "./types";
 
 function App() {
@@ -97,6 +102,15 @@ function App() {
     }
   }
 
+  async function deleteSavedSearch(savedSearchId: string) {
+    try {
+      await deleteSavedSearchApi(savedSearchId);
+      await loadSavedSearches();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <div className="page">
       <h1>AI Deal Agent</h1>
@@ -128,6 +142,7 @@ function App() {
         savedSearches={savedSearches}
         onSavedSearchClick={setQuery}
         onRunSavedSearch={searchProducts}
+        onDeleteSavedSearch={deleteSavedSearch}
       />
 
       {products.length === 0 && !loading && !error && (
