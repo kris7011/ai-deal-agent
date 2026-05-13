@@ -1,9 +1,9 @@
 import { useState } from "react";
 import "./App.css";
-import ProductCard from "./components/ProductCard";
 import SearchSection from "./components/SearchSection";
 import RequirementsSummary from "./components/RequirementsSummary";
 import EmptyState from "./components/EmptyState";
+import ProductGrid from "./components/ProductGrid";
 import type { ProductResult, SearchRequirements } from "./types";
 import { searchProductsApi } from "./api";
 
@@ -78,11 +78,7 @@ function App() {
 
       {loading && <p>Loader...</p>}
 
-      <div className="product-grid">
-        {products.map((item) => (
-          <ProductCard key={item.product.url} item={item} />
-        ))}
-      </div>
+      <ProductGrid products={products} />
     </div>
   );
 }

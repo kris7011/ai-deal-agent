@@ -13,7 +13,10 @@
         "fastapi",
         "fejl",
         "fejlede",
+        "finde",
         "forhandler",
+        "forklare",
+        "forsøger",
         "først",
         "forstod",
         "gemt",
@@ -21,6 +24,7 @@
         "herre",
         "hvad",
         "hvis",
+        "hvorfor",
         "igen",
         "Ikke",
         "kaffemaskine",
@@ -42,6 +46,7 @@
         "Prøv",
         "pycache",
         "pythonpath",
+        "relevante",
         "Resultater",
         "SERPAPI",
         "skete",
@@ -69,6 +74,7 @@
         "vandtæt",
         "venligst",
         "venv",
-        "vinterjakke"
+        "vinterjakke",
+        "webshop"
     ]
 }
