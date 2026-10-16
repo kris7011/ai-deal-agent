@@ -15,7 +15,8 @@ def generate_badges(
     elif score >= 40:
         badges.append("Muligt match")
 
-    if requirements.max_price is not None and product.price <= requirements.max_price:
+    # A price of 0 means the price could not be parsed, so it is unknown rather than under budget.
+    if requirements.max_price is not None and 0 < product.price <= requirements.max_price:
         badges.append("Under budget")
 
     if product.rating is not None and product.rating >= 4.5:

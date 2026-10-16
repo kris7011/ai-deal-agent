@@ -4,14 +4,15 @@ from pathlib import Path
 from uuid import uuid4
 
 from app.requirements import SearchRequirements
+from app.settings import PROJECT_ROOT
 
-DEFAULT_STORAGE_PATH = Path("data/saved_searches.json")
+DEFAULT_STORAGE_PATH = PROJECT_ROOT / "data" / "saved_searches.json"
 
 
 def load_saved_searches(
-    storage_path: Path | str = DEFAULT_STORAGE_PATH,
+    storage_path: Path | str | None = None,
 ) -> list[dict]:
-    path = Path(storage_path)
+    path = _resolve_storage_path(storage_path)
 
     if not path.exists():
         return []
@@ -25,9 +26,9 @@ def save_search(
     requirements: SearchRequirements,
     result_count: int,
     best_score: int,
-    storage_path: Path | str = DEFAULT_STORAGE_PATH,
+    storage_path: Path | str | None = None,
 ) -> dict:
-    path = Path(storage_path)
+    path = _resolve_storage_path(storage_path)
 
     saved_searches = load_saved_searches(path)
 
@@ -52,7 +53,7 @@ def save_search(
 
     saved_searches.append(saved_search)
 
-    path.parent.mkdir(exist_ok=True)
+    path.parent.mkdir(parents=True, exist_ok=True)
 
     with open(path, "w", encoding="utf-8") as file:
         json.dump(saved_searches, file, indent=2, ensure_ascii=False)
@@ -62,9 +63,9 @@ def save_search(
 
 def delete_saved_search(
     saved_search_id: str,
-    storage_path: Path | str = DEFAULT_STORAGE_PATH,
+    storage_path: Path | str | None = None,
 ) -> bool:
-    path = Path(storage_path)
+    path = _resolve_storage_path(storage_path)
 
     saved_searches = load_saved_searches(path)
 
@@ -77,12 +78,17 @@ def delete_saved_search(
     if len(updated_saved_searches) == len(saved_searches):
         return False
 
-    path.parent.mkdir(exist_ok=True)
+    path.parent.mkdir(parents=True, exist_ok=True)
 
     with open(path, "w", encoding="utf-8") as file:
         json.dump(updated_saved_searches, file, indent=2, ensure_ascii=False)
 
     return True
+
+
+def _resolve_storage_path(storage_path: Path | str | None) -> Path:
+    # Resolved at call time so the default location can be changed (for example in tests).
+    return Path(storage_path) if storage_path is not None else DEFAULT_STORAGE_PATH
 
 
 def _normalize_query(query: str) -> str:
