@@ -1,11 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.settings import get_cors_origins
 from app.badge_generator import generate_badges
 from app.explainer import generate_explanation
-from app.product_search import search_products
+from app.product_search import SearchServiceError, search_products
 from app.requirements_parser import parse_requirements
 from app.scorer import calculate_score
 from app.saved_searches import delete_saved_search, load_saved_searches, save_search
@@ -27,9 +27,9 @@ class SearchRequest(BaseModel):
 
 
 class SaveSearchRequest(BaseModel):
-    query: str
-    result_count: int
-    best_score: int
+    query: str = Field(min_length=1)
+    result_count: int = Field(ge=0)
+    best_score: int = Field(ge=0, le=100)
 
 
 @app.get("/")
@@ -39,11 +39,19 @@ def root() -> dict:
 
 @app.post("/api/search")
 def search(request: SearchRequest) -> dict:
-    requirements = parse_requirements(request.query)
+    query = request.query.strip()
+
+    if not query:
+        raise HTTPException(
+            status_code=400,
+            detail="Skriv hvad du leder efter først.",
+        )
+
+    requirements = parse_requirements(query)
 
     try:
         search_result = search_products(
-            request.query,
+            query,
             allow_live_search=request.allow_live_search,
         )
 
@@ -51,6 +59,11 @@ def search(request: SearchRequest) -> dict:
     except ValueError as error:
         raise HTTPException(
             status_code=400,
+            detail=str(error),
+        )
+    except SearchServiceError as error:
+        raise HTTPException(
+            status_code=502,
             detail=str(error),
         )
 
@@ -74,7 +87,7 @@ def search(request: SearchRequest) -> dict:
     )
 
     return {
-        "query": request.query,
+        "query": query,
         "count": len(scored_products),
         "used_cache": search_result.used_cache,
         "requirements": {

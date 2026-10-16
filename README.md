@@ -173,7 +173,7 @@ Install Python dependencies:
 pip install -r requirements.txt
 ```
 
-For development and tests, install the dev requirements instead (adds pytest and httpx):
+For development and tests, install the dev requirements instead (adds pytest and httpx2 for FastAPI's TestClient):
 
 ```bash
 pip install -r requirements-dev.txt
@@ -295,6 +295,12 @@ Tillad live-søgning hvis cache mangler
 ```
 
 After testing live search, set `ALLOW_LIVE_SEARCH` back to `false`.
+
+### Cache files and error handling
+
+Cached responses are stored in `cache/` in the project root, one JSON file per query. File names are derived from the lowercased query with spaces replaced by underscores. Characters that are not safe in file names (for example `/ \ ? : * " < > |`) are replaced as well, so a query can never write outside the cache folder or fail on Windows.
+
+If SerpAPI is unreachable, times out or returns an error, the API responds with `502 Bad Gateway` and a Danish error message. Error responses are never written to the cache.
 
 ---
 
@@ -422,6 +428,8 @@ ALLOW_LIVE_SEARCH=false
 ```
 
 This prevents new SerpAPI calls globally.
+
+The backend reads `.env` from the project root once at startup. Variables that are already set in the environment take precedence over `.env`, so restart the backend after changing `.env`.
 
 ### 2. Frontend Checkbox
 
@@ -592,6 +600,11 @@ Current test coverage includes:
 - Product scoring
 - Feature matching
 - Saved searches
+- API endpoints with FastAPI's `TestClient` (search, validation, error codes, saved search lifecycle)
+- Cache file naming and round trips
+- Product search: price parsing, cache-first behaviour, live search guards and SerpAPI failures
+
+The tests never call SerpAPI and never need an API key. `tests/conftest.py` blocks all outgoing HTTP requests, forces `ALLOW_LIVE_SEARCH=false`, removes `SERPAPI_API_KEY`, and redirects the cache and saved searches to a temporary folder for every test. Live search is tested with a mocked SerpAPI response.
 
 ---
 

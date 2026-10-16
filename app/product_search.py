@@ -1,9 +1,17 @@
-import os
-import requests
-from dotenv import load_dotenv
+import logging
 from dataclasses import dataclass
-from app.models import Product
+
+import requests
+
 from app.cache_service import load_cache, save_cache
+from app.models import Product
+from app.settings import get_serpapi_api_key, is_live_search_enabled
+
+logger = logging.getLogger(__name__)
+
+
+class SearchServiceError(Exception):
+    """Raised when the external product search service (SerpAPI) fails or returns an error."""
 
 
 @dataclass
@@ -13,10 +21,6 @@ class ProductSearchResult:
 
 
 def search_products(query: str, allow_live_search: bool = False) -> ProductSearchResult:
-    load_dotenv(override=True)
-
-    live_search_enabled = os.getenv("ALLOW_LIVE_SEARCH", "false").lower() == "true"
-
     cached_data = load_cache(query)
     used_cache = False
 
@@ -29,30 +33,17 @@ def search_products(query: str, allow_live_search: bool = False) -> ProductSearc
                 "Ingen cache fundet for denne søgning. Live-søgning er ikke valgt."
             )
 
-        if not live_search_enabled:
+        if not is_live_search_enabled():
             raise ValueError(
                 "Live-søgning er slået fra i .env. Sæt ALLOW_LIVE_SEARCH=true for at tillade nye SerpAPI-kald."
             )
 
-        api_key = os.getenv("SERPAPI_API_KEY")
+        api_key = get_serpapi_api_key()
 
         if not api_key:
             raise ValueError("SERPAPI_API_KEY is missing from .env")
 
-        response = requests.get(
-            "https://serpapi.com/search.json",
-            params={
-                "engine": "google_shopping",
-                "q": query,
-                "api_key": api_key,
-                "gl": "dk",
-                "hl": "da",
-            },
-            timeout=20,
-        )
-
-        response.raise_for_status()
-        data = response.json()
+        data = _fetch_from_serpapi(query, api_key)
         save_cache(query, data)
 
     shopping_results = data.get("shopping_results", [])
@@ -79,6 +70,35 @@ def search_products(query: str, allow_live_search: bool = False) -> ProductSearc
         products=products,
         used_cache=used_cache,
     )
+
+
+def _fetch_from_serpapi(query: str, api_key: str) -> dict:
+    try:
+        response = requests.get(
+            "https://serpapi.com/search.json",
+            params={
+                "engine": "google_shopping",
+                "q": query,
+                "api_key": api_key,
+                "gl": "dk",
+                "hl": "da",
+            },
+            timeout=20,
+        )
+        response.raise_for_status()
+        data = response.json()
+    except (requests.RequestException, ValueError) as error:
+        # Log the type only: request exceptions can contain the URL including the API key.
+        logger.warning("SerpAPI request failed: %s", type(error).__name__)
+        raise SearchServiceError(
+            "Produktsøgningen hos SerpAPI fejlede. Prøv igen senere."
+        ) from error
+
+    if not isinstance(data, dict) or "error" in data:
+        logger.warning("SerpAPI returned an error response")
+        raise SearchServiceError("SerpAPI returnerede en fejl. Prøv igen senere.")
+
+    return data
 
 
 def _parse_price(price_text: str | None) -> int:
