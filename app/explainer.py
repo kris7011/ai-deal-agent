@@ -10,7 +10,9 @@ def generate_explanation(
     explanations = []
 
     if requirements.max_price is not None:
-        if product.price <= requirements.max_price:
+        if product.price <= 0:
+            explanations.append("? Pris ukendt")
+        elif product.price <= requirements.max_price:
             explanations.append(f"✓ Under budget ({product.price} kr.)")
         else:
             explanations.append(f"✗ Over budget ({product.price} kr.)")

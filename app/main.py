@@ -16,7 +16,7 @@ def main() -> None:
 
     products = enrich_products(search_products(
         "robotstøvsuger moppe obstacle avoidance høj sugeevne"
-    ))
+    ).products)
 
     best_product = recommend_best_product(products, requirements)
 
