@@ -227,6 +227,8 @@ Use `frontend/.env.example` as a template:
 VITE_API_BASE_URL=http://127.0.0.1:8000
 ```
 
+If `VITE_API_BASE_URL` is not set, the frontend falls back to `http://127.0.0.1:8000`.
+
 Install dependencies:
 
 ```bash
@@ -610,6 +612,19 @@ The tests never call SerpAPI and never need an API key. `tests/conftest.py` bloc
 
 ---
 
+### Frontend tests
+
+The frontend has component tests with Vitest, React Testing Library and jsdom. `fetch` is stubbed with a small in-memory fake of the API, so no backend or SerpAPI key is needed:
+
+```bash
+cd frontend
+npm test
+```
+
+They cover the search flow (parsed requirements, cache/live source, ranked products), the live-search checkbox, error messages (backend `detail`, FastAPI validation errors, non-JSON errors, unreachable backend), saving searches with duplicate protection, running and deleting saved searches, and product card rendering.
+
+---
+
 ## Quality Checks
 
 Run backend tests from the project root:
@@ -623,6 +638,7 @@ Lint and build the frontend from the frontend folder:
 ```bash
 cd frontend
 npm run lint
+npm test
 npm run build
 ```
 
@@ -639,7 +655,7 @@ Git working tree clean
 GitHub Actions (`.github/workflows/ci.yml`) runs on every push to `main` and on every pull request:
 
 - Backend: installs `requirements-dev.txt` on Python 3.12 and runs `python -m pytest`
-- Frontend: `npm ci`, `npm run lint` and `npm run build`
+- Frontend: `npm ci`, `npm run lint`, `npm test` and `npm run build`
 
 CI sets `ALLOW_LIVE_SEARCH=false` and provides no SerpAPI key, so it can never make paid API calls.
 
