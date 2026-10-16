@@ -120,6 +120,7 @@ ai-deal-agent/
 ├── .env.example
 ├── .gitignore
 ├── pytest.ini
+├── requirements-dev.txt
 ├── requirements.txt
 └── README.md
 ```
@@ -170,6 +171,12 @@ Install Python dependencies:
 
 ```bash
 pip install -r requirements.txt
+```
+
+For development and tests, install the dev requirements instead (adds pytest and httpx):
+
+```bash
+pip install -r requirements-dev.txt
 ```
 
 Create a `.env` file in the project root.
@@ -596,10 +603,11 @@ Run backend tests from the project root:
 python -m pytest
 ```
 
-Build the frontend from the frontend folder:
+Lint and build the frontend from the frontend folder:
 
 ```bash
 cd frontend
+npm run lint
 npm run build
 ```
 
@@ -607,9 +615,18 @@ A healthy project state should have:
 
 ```txt
 Backend tests passing
-Frontend production build passing
+Frontend lint and production build passing
 Git working tree clean
 ```
+
+### Continuous integration
+
+GitHub Actions (`.github/workflows/ci.yml`) runs on every push to `main` and on every pull request:
+
+- Backend: installs `requirements-dev.txt` on Python 3.12 and runs `python -m pytest`
+- Frontend: `npm ci`, `npm run lint` and `npm run build`
+
+CI sets `ALLOW_LIVE_SEARCH=false` and provides no SerpAPI key, so it can never make paid API calls.
 
 If the frontend build fails because of local path or sync-folder issues, run the build from the actual project folder path used by your system.
 
