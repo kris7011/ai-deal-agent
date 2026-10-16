@@ -298,7 +298,9 @@ After testing live search, set `ALLOW_LIVE_SEARCH` back to `false`.
 
 ### Cache files and error handling
 
-Cached responses are stored in `cache/` in the project root, one JSON file per query. File names are derived from the lowercased query with spaces replaced by underscores. Characters that are not safe in file names (for example `/ \ ? : * " < > |`) are replaced as well, so a query can never write outside the cache folder or fail on Windows.
+Cached responses are stored in `cache/` in the project root, one JSON file per query. The file name is a stable key: a readable label from the query plus the first 16 hex characters of the SHA-256 hash of the normalized query (lowercase, repeated whitespace collapsed), for example `robotstøvsuger_med_moppe-e393725d9d5c75d7.json`. Different queries such as `laptop/16GB` and `laptop?16GB` therefore never share a file, and a query can never write outside the cache folder.
+
+Cache files from older versions (named only from the lowercased query) are still used, but only when the SerpAPI response inside the file records the same query in `search_parameters.q`. Such files are copied to the new name on first use. Files that cannot be proven to belong to the query are ignored.
 
 If SerpAPI is unreachable, times out or returns an error, the API responds with `502 Bad Gateway` and a Danish error message. Error responses are never written to the cache.
 
