@@ -32,7 +32,9 @@ function App() {
   ];
 
   useEffect(() => {
-    loadSavedSearches();
+    getSavedSearchesApi()
+      .then((data) => setSavedSearches(data.saved_searches))
+      .catch((error) => console.error(error));
   }, []);
 
   async function searchProducts(searchQuery: string = query) {
