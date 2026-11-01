@@ -1,0 +1,71 @@
+{
+  "ai_deal_agent_demo": true,
+  "demo_notice": "Fictional demonstration data for AI Deal Agent. Products, shops and prices are invented; this is not a real SerpAPI response.",
+  "search_metadata": {
+    "status": "Success",
+    "created_at": "2026-10-31 09:30:00 UTC"
+  },
+  "search_parameters": {
+    "engine": "google_shopping",
+    "q": "robotstøvsuger med moppe og høj sugeevne",
+    "gl": "dk",
+    "hl": "da"
+  },
+  "shopping_results": [
+    {
+      "position": 1,
+      "title": "Nordvac R5 Mop Pro robotstøvsuger med moppe 5000 Pa",
+      "product_id": "demo-rv-001",
+      "price": "4.499 kr.",
+      "extracted_price": 4499,
+      "rating": 4.6,
+      "source": "Demo Elektronik",
+      "product_link": "https://example.com/demo/demo-rv-001",
+      "thumbnail": null
+    },
+    {
+      "position": 2,
+      "title": "Hjemlig AquaClean robotstøvsuger med moppe 4000Pa",
+      "product_id": "demo-rv-002",
+      "price": "3.299 kr.",
+      "extracted_price": 3299,
+      "rating": 4.3,
+      "source": "Demo Hvidevarer",
+      "product_link": "https://example.com/demo/demo-rv-002",
+      "thumbnail": null
+    },
+    {
+      "position": 3,
+      "title": "Støvfri S1 robotstøvsuger med moppe og forhindringsgenkendelse 6000 Pa",
+      "product_id": "demo-rv-003",
+      "price": "6.799 kr.",
+      "extracted_price": 6799,
+      "rating": 4.8,
+      "source": "Demo Elektronik",
+      "product_link": "https://example.com/demo/demo-rv-003",
+      "thumbnail": null
+    },
+    {
+      "position": 4,
+      "title": "BudgetBot 2 robotstøvsuger 1800 Pa",
+      "product_id": "demo-rv-004",
+      "price": "1.299 kr.",
+      "extracted_price": 1299,
+      "rating": 3.9,
+      "source": "Demo Discount",
+      "product_link": "https://example.com/demo/demo-rv-004",
+      "thumbnail": null
+    },
+    {
+      "position": 5,
+      "title": "Nordvac R3 robotstøvsuger med moppe 2700 Pa",
+      "product_id": "demo-rv-005",
+      "price": "2.299 kr.",
+      "extracted_price": 2299,
+      "rating": null,
+      "source": "Demo Hvidevarer",
+      "product_link": "https://example.com/demo/demo-rv-005",
+      "thumbnail": null
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "ai_deal_agent_demo": true,
+  "demo_notice": "Fictional demonstration data for AI Deal Agent. Products, shops and prices are invented; this is not a real SerpAPI response.",
+  "search_metadata": {
+    "status": "Success",
+    "created_at": "2026-10-10 09:15:00 UTC"
+  },
+  "search_parameters": {
+    "engine": "google_shopping",
+    "q": "laptop til programmering med 16GB RAM under 8000 kr",
+    "gl": "dk",
+    "hl": "da"
+  },
+  "shopping_results": [
+    {
+      "position": 1,
+      "title": "Kodebog 14 laptop 16GB RAM 512GB SSD",
+      "product_id": "demo-lt-001",
+      "price": "7.499 kr.",
+      "extracted_price": 7499,
+      "rating": 4.5,
+      "source": "Demo Computer",
+      "product_link": "https://example.com/demo/demo-lt-001",
+      "thumbnail": null
+    },
+    {
+      "position": 2,
+      "title": "DevBook Air 13 laptop 16GB RAM",
+      "product_id": "demo-lt-002",
+      "price": "7.999 kr.",
+      "extracted_price": 7999,
+      "rating": 4.7,
+      "source": "Demo Elektronik",
+      "product_link": "https://example.com/demo/demo-lt-002",
+      "thumbnail": null
+    },
+    {
+      "position": 3,
+      "title": "Arbejdsbog 15 laptop 8GB RAM",
+      "product_id": "demo-lt-003",
+      "price": "4.299 kr.",
+      "extracted_price": 4299,
+      "rating": 3.8,
+      "source": "Demo Discount",
+      "product_link": "https://example.com/demo/demo-lt-003",
+      "thumbnail": null
+    },
+    {
+      "position": 4,
+      "title": "Kodebog 16 Pro laptop 32GB RAM",
+      "product_id": "demo-lt-004",
+      "price": "10.999 kr.",
+      "extracted_price": 10999,
+      "rating": 4.6,
+      "source": "Demo Computer",
+      "product_link": "https://example.com/demo/demo-lt-004",
+      "thumbnail": null
+    }
+  ]
+}

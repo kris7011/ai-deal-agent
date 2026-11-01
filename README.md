@@ -43,7 +43,13 @@ It then searches for products, scores them, and presents the results in a websho
 - Run saved searches again
 - Delete saved searches
 - Duplicate protection for saved searches
-- Backend tests with pytest
+- Price history stored in SQLite, dated by when the data was fetched from the source
+- Source and freshness shown for every search and price (live, cache or demo; fresh, aging or stale)
+- Comparison of 2-4 products side by side
+- Offline demo with fictional, clearly labelled demo data (no SerpAPI key needed)
+- Backend tests with pytest and frontend tests with Vitest
+
+A developer walkthrough of the design, tests and trade-offs is in [docs/PROJECT_WALKTHROUGH.md](docs/PROJECT_WALKTHROUGH.md).
 
 ---
 
@@ -77,10 +83,14 @@ ai-deal-agent/
 │   ├── api.py
 │   ├── badge_generator.py
 │   ├── cache_service.py
+│   ├── comparison.py
 │   ├── debug_cache.py
+│   ├── demo_seed.py
 │   ├── explainer.py
 │   ├── feature_matcher.py
+│   ├── freshness.py
 │   ├── models.py
+│   ├── price_history.py
 │   ├── product_search.py
 │   ├── requirements.py
 │   ├── requirements_parser.py
@@ -92,7 +102,14 @@ ai-deal-agent/
 │   └── cached SerpAPI responses
 │
 ├── data/
-│   └── runtime saved search data
+│   └── runtime saved searches and price_history.sqlite3
+│
+├── demo/
+│   └── snapshots/ (fictional, dated demo responses)
+│
+├── docs/
+│   ├── PROJECT_WALKTHROUGH.md
+│   └── images/
 │
 ├── frontend/
 │   ├── src/
@@ -590,6 +607,62 @@ app/badge_generator.py
 
 ---
 
+## Price History, Comparison and Freshness
+
+![Search results with source, fetch time and price history](docs/images/search-with-history.png)
+
+### How prices are recorded
+
+Every search stores the prices it returns in a SQLite database (`data/price_history.sqlite3`, created automatically, ignored by Git). It uses Python's built-in `sqlite3`, so there is no extra service or dependency.
+
+- An observation is dated with the time the data was **fetched from the source**: SerpAPI's `search_metadata.created_at`, or the cache file's time if that is missing. It is never the time the cache was read.
+- The same product, fetch time and price is stored once (a unique constraint). Searching the same cached query again therefore adds nothing: the history only grows when new data arrives from a live search or newly loaded snapshots.
+- Every observation records its origin: `live` (fetched now from SerpAPI), `cache` (an earlier SerpAPI response) or `demo` (fictional demonstration data).
+- A product is identified by SerpAPI's `product_id` when present, otherwise by its normalised name and shop.
+- If the history database cannot be written, the search still answers; the history fields are then `null`.
+
+### Freshness
+
+| Age of the data | Status |
+| --- | --- |
+| under 24 hours | `fresh` (Frisk) |
+| 1-7 days | `aging` (Ældre) |
+| 7 days or more | `stale` (Forældet) |
+
+The search response has a `data_source` block (`origin`, `origin_label`, `fetched_at`, `age_hours`, `status`). Each product has a `product_id` and a `price_history` summary (latest, lowest and highest price, previous different price, change, number of observations, and whether today's price is the lowest seen). These fields are additions; the existing response fields are unchanged.
+
+### Endpoints
+
+```text
+GET /api/products/{product_id}/price-history     all observations, oldest first, plus the summary
+GET /api/products/compare?ids=1&ids=2&ids=3      2-4 different products side by side
+```
+
+The comparison marks `cheapest_now`, `best_rated` (only when at least two products have a rating) and `lowest_price_seen`, and reports the price spread. Fewer than 2 or more than 4 different ids give `400`; unknown ids give `404`.
+
+![Price history of one product](docs/images/price-history.png)
+
+![Comparison of three products](docs/images/comparison.png)
+
+### Offline demo with cached data
+
+`demo/snapshots/` contains eight fictional SerpAPI-shaped responses for two example queries, dated 10, 17, 24 and 31 October 2026. Products, shops and prices are invented, links point to `example.com`, and every file carries `"ai_deal_agent_demo": true`. The API and the UI therefore always label them "Demodata (fiktive priser)".
+
+```bash
+python -m app.demo_seed
+```
+
+This loads every snapshot into the price history and writes the newest snapshot of each query to `cache/`, **only if no cache file exists for that query**. Real cached searches are never overwritten. Running it again adds nothing.
+
+Then start the backend and frontend, keep live search off, and search for:
+
+- `robotstøvsuger med moppe og høj sugeevne`
+- `laptop til programmering med 16GB RAM under 8000 kr`
+
+No SerpAPI request is made, and no API key is needed.
+
+---
+
 ## Running Tests
 
 Run all backend tests from the project root:
@@ -607,6 +680,10 @@ Current test coverage includes:
 - API endpoints with FastAPI's `TestClient` (search, validation, error codes, saved search lifecycle)
 - Cache file naming and round trips
 - Product search: price parsing, cache-first behaviour, live search guards and SerpAPI failures
+- Price history: dating by fetch time, no duplicate history from repeated cache reads, origin per observation, products without price, older data not overwriting newer details, summaries and the database's price constraint
+- Freshness thresholds and comparison highlights (including ties and missing values)
+- Demo snapshots: marker and dating, idempotent seeding, never overwriting an existing cache file
+- API: data source and history in search results, live searches recorded as live, demo labelling, history and comparison endpoints with their 400/404 cases, and search still working when the history database fails
 
 The tests never call SerpAPI and never need an API key. `tests/conftest.py` blocks all outgoing HTTP requests, forces `ALLOW_LIVE_SEARCH=false`, removes `SERPAPI_API_KEY`, and redirects the cache and saved searches to a temporary folder for every test. Live search is tested with a mocked SerpAPI response.
 
@@ -621,7 +698,7 @@ cd frontend
 npm test
 ```
 
-They cover the search flow (parsed requirements, cache/live source, ranked products), the live-search checkbox, error messages (backend `detail`, FastAPI validation errors, non-JSON errors, unreachable backend), saving searches with duplicate protection, running and deleting saved searches, and product card rendering.
+They cover the search flow (parsed requirements, cache/live source, ranked products), the live-search checkbox, error messages (backend `detail`, FastAPI validation errors, non-JSON errors, unreachable backend), saving searches with duplicate protection, running and deleting saved searches, product card rendering, the demo data label and fetch times, loading a product's price history, comparing selected products and the limit of four.
 
 ---
 
@@ -690,7 +767,8 @@ This makes the system easier to understand, debug, and extend.
 - The search parser is simple and does not fully understand complex natural language.
 - Saved searches are stored in a local JSON file rather than a database.
 - There is no user login or multi-user support yet.
-- There is no price history tracking yet.
+- Price history is only as frequent as the searches that bring new data; there is no scheduled price polling (it would spend SerpAPI quota).
+- The demo history is fictional; real history builds up only from live searches.
 - There is no production deployment yet.
 
 ---
@@ -698,8 +776,8 @@ This makes the system easier to understand, debug, and extend.
 ## Possible Future Improvements
 
 - Direct retailer link lookup
-- Price history tracking
-- Saved searches backed by a database
+- Scheduled price polling within an explicit quota budget
+- Saved searches in the same SQLite database
 - Email or push notifications for price drops
 - Affiliate link support
 - LLM-based requirement parsing

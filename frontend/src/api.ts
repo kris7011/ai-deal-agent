@@ -1,9 +1,17 @@
-import type { ProductResult, SavedSearch, SearchRequirements } from "./types";
+import type {
+    Comparison,
+    Freshness,
+    PriceHistory,
+    ProductResult,
+    SavedSearch,
+    SearchRequirements,
+} from "./types";
 
 export type SearchResponse = {
     query: string;
     count: number;
     used_cache: boolean;
+    data_source?: Freshness;
     requirements: SearchRequirements;
     products: ProductResult[];
 };
@@ -118,5 +126,21 @@ export async function deleteSavedSearchApi(savedSearchId: string): Promise<void>
         `/api/saved-searches/${encodeURIComponent(savedSearchId)}`,
         "Kunne ikke slette søgningen.",
         { method: "DELETE" },
+    );
+}
+
+export function getPriceHistoryApi(productId: number): Promise<PriceHistory> {
+    return requestJson<PriceHistory>(
+        `/api/products/${productId}/price-history`,
+        "Kunne ikke hente prishistorikken.",
+    );
+}
+
+export function compareProductsApi(productIds: number[]): Promise<Comparison> {
+    const params = new URLSearchParams(productIds.map((id) => ["ids", String(id)]));
+
+    return requestJson<Comparison>(
+        `/api/products/compare?${params}`,
+        "Kunne ikke sammenligne produkterne.",
     );
 }

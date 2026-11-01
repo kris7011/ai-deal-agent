@@ -2,6 +2,7 @@ import hashlib
 import json
 import logging
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 
 from app.settings import PROJECT_ROOT
@@ -53,6 +54,16 @@ def load_cache(query: str) -> dict | None:
         return _read_json(cache_path)
 
     return _load_legacy_cache(query)
+
+
+def get_cache_modified_at(query: str) -> datetime | None:
+    """When the cache file was written; used when the cached response does not record its fetch time."""
+    cache_path = get_cache_path(query)
+
+    if not cache_path.exists():
+        return None
+
+    return datetime.fromtimestamp(cache_path.stat().st_mtime, tz=timezone.utc)
 
 
 def save_cache(query: str, data: dict) -> None:

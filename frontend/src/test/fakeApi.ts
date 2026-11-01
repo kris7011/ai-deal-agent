@@ -51,7 +51,7 @@ export function savedSearch(id: string, query: string, createdAt: string): Saved
   };
 }
 
-type Route = (method: string, path: string, body: unknown) => Response | Promise<Response> | undefined;
+export type Route = (method: string, path: string, body: unknown) => Response | Promise<Response> | undefined;
 
 /**
  * Stubs global fetch with an in-memory version of the AI Deal Agent API.

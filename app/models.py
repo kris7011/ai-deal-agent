@@ -13,3 +13,5 @@ class Product:
     can_handle_rugs: bool | None
     rating: float | None
     source: str
+    # The shop's or SerpAPI's own product id when the search result has one.
+    external_id: str | None = None
