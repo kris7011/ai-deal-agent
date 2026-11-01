@@ -1,9 +1,11 @@
 import logging
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
 import requests
 
-from app.cache_service import load_cache, save_cache
+from app.cache_service import get_cache_modified_at, load_cache, save_cache
+from app.freshness import utc_now
 from app.models import Product
 from app.settings import get_serpapi_api_key, is_live_search_enabled
 
@@ -14,10 +16,20 @@ class SearchServiceError(Exception):
     """Raised when the external product search service (SerpAPI) fails or returns an error."""
 
 
+# Set on the committed demonstration snapshots so their fictional prices are never shown as real data.
+DEMO_MARKER = "ai_deal_agent_demo"
+
+_SERPAPI_TIME_FORMAT = "%Y-%m-%d %H:%M:%S UTC"
+
+
 @dataclass
 class ProductSearchResult:
     products: list[Product]
     used_cache: bool
+    # When the data was fetched from the source. For cached data this is the original fetch time.
+    fetched_at: datetime
+    # "live", "cache" or "demo".
+    origin: str
 
 
 def search_products(query: str, allow_live_search: bool = False) -> ProductSearchResult:
@@ -27,6 +39,8 @@ def search_products(query: str, allow_live_search: bool = False) -> ProductSearc
     if cached_data is not None:
         data = cached_data
         used_cache = True
+        fetched_at = read_fetched_at(data) or get_cache_modified_at(query) or utc_now()
+        origin = "demo" if data.get(DEMO_MARKER) is True else "cache"
     else:
         if not allow_live_search:
             raise ValueError(
@@ -45,12 +59,22 @@ def search_products(query: str, allow_live_search: bool = False) -> ProductSearc
 
         data = _fetch_from_serpapi(query, api_key)
         save_cache(query, data)
+        fetched_at = read_fetched_at(data) or utc_now()
+        origin = "live"
 
-    shopping_results = data.get("shopping_results", [])
+    return ProductSearchResult(
+        products=products_from_serpapi(data),
+        used_cache=used_cache,
+        fetched_at=fetched_at,
+        origin=origin,
+    )
 
+
+def products_from_serpapi(data: dict) -> list[Product]:
+    """Turns a SerpAPI Google Shopping response into products."""
     products = []
 
-    for item in shopping_results:
+    for item in data.get("shopping_results", []):
         product = Product(
             name=item.get("title", "Unknown product"),
             price=_parse_price(item.get("price")),
@@ -62,14 +86,32 @@ def search_products(query: str, allow_live_search: bool = False) -> ProductSearc
             can_handle_rugs=None,
             rating=item.get("rating"),
             source=item.get("source", "Google Shopping"),
+            external_id=_get_external_id(item),
         )
 
         products.append(product)
 
-    return ProductSearchResult(
-        products=products,
-        used_cache=used_cache,
-    )
+    return products
+
+
+def read_fetched_at(data: dict) -> datetime | None:
+    """SerpAPI records when it ran the search in search_metadata.created_at."""
+    metadata = data.get("search_metadata")
+    created_at = metadata.get("created_at") if isinstance(metadata, dict) else None
+
+    if not isinstance(created_at, str):
+        return None
+
+    try:
+        return datetime.strptime(created_at, _SERPAPI_TIME_FORMAT).replace(tzinfo=timezone.utc)
+    except ValueError:
+        return None
+
+
+def _get_external_id(item: dict) -> str | None:
+    product_id = item.get("product_id")
+
+    return str(product_id) if product_id not in (None, "") else None
 
 
 def _fetch_from_serpapi(query: str, api_key: str) -> dict:

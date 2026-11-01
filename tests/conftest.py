@@ -2,6 +2,7 @@ import pytest
 import requests
 
 import app.cache_service
+import app.price_history
 import app.saved_searches
 
 
@@ -21,6 +22,7 @@ def isolate_tests(monkeypatch, tmp_path):
 
     monkeypatch.setattr(app.cache_service, "CACHE_DIR", tmp_path / "cache")
     monkeypatch.setattr(app.saved_searches, "DEFAULT_STORAGE_PATH", tmp_path / "data" / "saved_searches.json")
+    monkeypatch.setattr(app.price_history, "DEFAULT_DB_PATH", tmp_path / "data" / "price_history.sqlite3")
 
 
 def shopping_result(title: str, price: str | None, rating: float | None = None, **extra) -> dict:

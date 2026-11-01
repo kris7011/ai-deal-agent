@@ -47,6 +47,7 @@ def enrich_product(product: Product) -> Product:
         can_handle_rugs=can_handle_rugs,
         rating=product.rating,
         source=product.source,
+        external_id=product.external_id,
     )
 
 
